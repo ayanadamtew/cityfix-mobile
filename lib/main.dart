@@ -10,6 +10,7 @@ import 'core/router.dart';
 import 'core/constants.dart';
 import 'core/push_notification_service.dart';
 import 'services/offline_sync_service.dart';
+import 'features/profile/providers/settings_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -65,12 +66,25 @@ class _CityFixAppState extends ConsumerState<CityFixApp> {
   @override
   Widget build(BuildContext context) {
     final router = ref.watch(routerProvider);
+    final settings = ref.watch(settingsProvider);
+    
+    ThemeMode themeMode;
+    switch (settings['themeMode']) {
+      case 'light':
+        themeMode = ThemeMode.light;
+        break;
+      case 'dark':
+        themeMode = ThemeMode.dark;
+        break;
+      default:
+        themeMode = ThemeMode.system;
+    }
 
     return MaterialApp.router(
       title: 'CityFix Jimma',
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
-      themeMode: ThemeMode.system,
+      themeMode: themeMode,
       routerConfig: router,
     );
   }

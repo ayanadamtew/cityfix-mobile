@@ -57,23 +57,24 @@ class IssueCard extends ConsumerWidget {
         : (firebaseUser?.uid ?? '');
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
+      margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(24),
         border: Border.all(
           color: theme.colorScheme.outlineVariant.withValues(alpha: 0.2),
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.02),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
+            color: theme.colorScheme.shadow.withValues(alpha: 0.08),
+            blurRadius: 16,
+            spreadRadius: 2,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
       child: InkWell(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(24),
         onTap: () => context.go('/feed/comments/${issue.id}'),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -250,7 +251,7 @@ class IssueCard extends ConsumerWidget {
 
             // ── Title & Description ─────────────────────────────────────
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -261,9 +262,10 @@ class IssueCard extends ConsumerWidget {
                         child: Text(
                           issue.title,
                           style: theme.textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
+                            fontWeight: FontWeight.w800,
+                            fontSize: 18,
                             height: 1.2,
-                            letterSpacing: -0.2,
+                            letterSpacing: -0.3,
                           ),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
@@ -273,14 +275,15 @@ class IssueCard extends ConsumerWidget {
                       IssueStatusBadge(status: issue.status),
                     ],
                   ),
-                  const SizedBox(height: 6),
+                  const SizedBox(height: 12),
                   Text(
                     issue.description,
                     style: theme.textTheme.bodyMedium?.copyWith(
                       color: theme.colorScheme.onSurfaceVariant,
                       height: 1.4,
+                      fontSize: 14,
                     ),
-                    maxLines: 2,
+                    maxLines: 3,
                     overflow: TextOverflow.ellipsis,
                   ),
                 ],

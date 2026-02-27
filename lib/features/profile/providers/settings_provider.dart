@@ -9,6 +9,7 @@ class SettingsNotifier extends Notifier<Map<String, dynamic>> {
     final box = Hive.box(AppConstants.userBox);
     return {
       'pushNotifications': box.get('pushNotifications', defaultValue: true),
+      'themeMode': box.get('themeMode', defaultValue: 'system'),
     };
   }
 
@@ -16,6 +17,12 @@ class SettingsNotifier extends Notifier<Map<String, dynamic>> {
     final box = Hive.box(AppConstants.userBox);
     box.put('pushNotifications', value);
     state = {...state, 'pushNotifications': value};
+  }
+
+  void updateThemeMode(String mode) {
+    final box = Hive.box(AppConstants.userBox);
+    box.put('themeMode', mode);
+    state = {...state, 'themeMode': mode};
   }
 }
 

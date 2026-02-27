@@ -216,6 +216,31 @@ class ProfileScreen extends ConsumerWidget {
                 ),
                 Divider(height: 1, color: Theme.of(context).colorScheme.outlineVariant.withOpacity(0.5)),
                 _SettingsTile(
+                  icon: Icons.dark_mode_rounded,
+                  title: 'App Theme',
+                  trailing: DropdownButtonHideUnderline(
+                    child: DropdownButton<String>(
+                      value: ref.watch(settingsProvider)['themeMode'],
+                      icon: const Icon(Icons.arrow_drop_down_rounded),
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                      items: const [
+                        DropdownMenuItem(value: 'system', child: Text('System Defaults')),
+                        DropdownMenuItem(value: 'light', child: Text('Light Mode')),
+                        DropdownMenuItem(value: 'dark', child: Text('Dark Mode')),
+                      ],
+                      onChanged: (String? mode) {
+                        if (mode != null) {
+                          ref.read(settingsProvider.notifier).updateThemeMode(mode);
+                        }
+                      },
+                    ),
+                  ),
+                ),
+                Divider(height: 1, color: Theme.of(context).colorScheme.outlineVariant.withOpacity(0.5)),
+                _SettingsTile(
                   icon: Icons.privacy_tip_rounded,
                   title: 'Privacy Policy',
                   onTap: () {

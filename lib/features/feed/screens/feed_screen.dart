@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -15,7 +16,6 @@ class FeedScreen extends ConsumerStatefulWidget {
 }
 
 class _FeedScreenState extends ConsumerState<FeedScreen> {
-  // Initialize with our default 'Closest' sorting and 'All' kebeles
   FeedFilter _currentFilter = const FeedFilter();
   Timer? _debounce;
   final TextEditingController _searchController = TextEditingController();
@@ -29,299 +29,327 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Watch the provider using our filter object
     final feedState = ref.watch(feedProvider(_currentFilter));
     final notifications = ref.watch(notificationsProvider);
 
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surfaceContainerLowest,
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.surface,
-        foregroundColor: Theme.of(context).colorScheme.onSurface,
-        elevation: 0,
-        scrolledUnderElevation: 0,
-        title: Row(
-          children: [
-            Icon(Icons.location_city, size: 24, color: Theme.of(context).colorScheme.primary),
-            const SizedBox(width: 8),
-            Text(
-              'CityFix',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 22,
-                color: Theme.of(context).colorScheme.primary,
+      body: CustomScrollView(
+        physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+        slivers: [
+          // ── App Bar ──────────────────────────────────────────────
+          SliverAppBar(
+            backgroundColor: Theme.of(context).colorScheme.surface.withValues(alpha: 0.8),
+            foregroundColor: Theme.of(context).colorScheme.onSurface,
+            elevation: 0,
+            pinned: true,
+            floating: true,
+            flexibleSpace: ClipRect(
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+                child: Container(color: Colors.transparent),
               ),
             ),
-          ],
-        ),
-        actions: [
-          _buildNotificationBell(context, ref, notifications),
-          IconButton(
-            icon: const Icon(Icons.person_outline),
-            tooltip: 'Profile',
-            onPressed: () => context.go('/profile'),
-          ),
-          const SizedBox(width: 8),
-        ],
-      ),
-      body: Column(
-        children: [
-          // ── Sticky Filter Bar ──────────────────────────────────────────────
-          Container(
-            padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surface,
-              border: Border(
-                bottom: BorderSide(
-                  color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.3),
-                ),
-              ),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
+            title: Row(
               children: [
-                // Search Bar
-                TextField(
-                  controller: _searchController,
-                  onChanged: (value) {
-                    if (_debounce?.isActive ?? false) _debounce!.cancel();
-                    _debounce = Timer(const Duration(milliseconds: 500), () {
-                      setState(() {
-                        _currentFilter = FeedFilter(
-                          sort: _currentFilter.sort,
-                          kebele: _currentFilter.kebele,
-                          search: value,
-                        );
-                      });
-                    });
-                  },
-                  textInputAction: TextInputAction.search,
-                  decoration: InputDecoration(
-                    hintText: 'Search categories, areas, or descriptions...',
-                    prefixIcon: const Icon(Icons.search_rounded),
-                    suffixIcon: _currentFilter.search.isNotEmpty
-                        ? IconButton(
-                            icon: const Icon(Icons.clear_rounded, size: 18),
-                            onPressed: () {
-                              _searchController.clear();
-                              setState(() {
-                                _currentFilter = FeedFilter(
-                                  sort: _currentFilter.sort,
-                                  kebele: _currentFilter.kebele,
-                                  search: '',
-                                );
-                              });
-                            },
-                          )
-                        : null,
-                    filled: true,
-                    fillColor: Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.4),
-                    contentPadding: const EdgeInsets.symmetric(vertical: 0),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(30),
-                      borderSide: BorderSide.none,
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(30),
-                      borderSide: BorderSide(
-                        color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.5),
-                        width: 1,
-                      ),
+                Icon(Icons.location_city, size: 28, color: Theme.of(context).colorScheme.primary),
+                const SizedBox(width: 8),
+                Text(
+                  'CityFix',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -0.5,
+                    fontSize: 24,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                ),
+              ],
+            ),
+            actions: [
+              _buildNotificationBell(context, ref, notifications),
+              IconButton(
+                icon: const Icon(Icons.person_outline_rounded),
+                onPressed: () => context.go('/profile'),
+              ),
+              const SizedBox(width: 8),
+            ],
+            bottom: PreferredSize(
+              preferredSize: const Size.fromHeight(130),
+              child: Container(
+                padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
+                decoration: BoxDecoration(
+                  border: Border(
+                    bottom: BorderSide(
+                      color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.3),
                     ),
                   ),
                 ),
-                const SizedBox(height: 12),
-                
-                // Filters Row (Sort Chips + Kebele Dropdown)
-                Row(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Expanded(
-                      flex: 6,
-                      child: SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        child: Row(
-                          children: [
-                            _buildSortChip('closest', 'Near', Icons.my_location),
-                            const SizedBox(width: 6),
-                            _buildSortChip('recent', 'New', Icons.access_time),
-                            const SizedBox(width: 6),
-                            _buildSortChip('urgent', 'Urgent', Icons.local_fire_department),
-                          ],
+                    // Search Bar
+                    TextField(
+                      controller: _searchController,
+                      onChanged: (value) {
+                        if (_debounce?.isActive ?? false) _debounce!.cancel();
+                        _debounce = Timer(const Duration(milliseconds: 500), () {
+                          setState(() {
+                            _currentFilter = FeedFilter(
+                              sort: _currentFilter.sort,
+                              kebele: _currentFilter.kebele,
+                              search: value,
+                            );
+                          });
+                        });
+                      },
+                      textInputAction: TextInputAction.search,
+                      decoration: InputDecoration(
+                        hintText: 'Search categories, areas, or descriptions...',
+                        prefixIcon: const Icon(Icons.search_rounded),
+                        suffixIcon: _currentFilter.search.isNotEmpty
+                            ? IconButton(
+                                icon: const Icon(Icons.clear_rounded, size: 18),
+                                onPressed: () {
+                                  _searchController.clear();
+                                  setState(() {
+                                    _currentFilter = FeedFilter(
+                                      sort: _currentFilter.sort,
+                                      kebele: _currentFilter.kebele,
+                                      search: '',
+                                    );
+                                  });
+                                },
+                              )
+                            : null,
+                        filled: true,
+                        fillColor: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
+                        contentPadding: const EdgeInsets.symmetric(vertical: 0),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(30),
+                          borderSide: BorderSide.none,
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(30),
+                          borderSide: BorderSide(
+                            color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.5),
+                            width: 1,
+                          ),
                         ),
                       ),
                     ),
-                    const SizedBox(width: 8),
-                    // Kebele Dropdown Compact
-                    Expanded(
-                      flex: 4,
-                      child: Container(
-                        height: 36, // Match standard chip height
-                        padding: const EdgeInsets.symmetric(horizontal: 12),
-                        decoration: BoxDecoration(
-                          border: Border.all(
-                            color: Theme.of(context).colorScheme.outlineVariant,
-                          ),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: DropdownButtonHideUnderline(
-                          child: DropdownButton<String>(
-                            value: _currentFilter.kebele,
-                            isExpanded: true,
-                            icon: const Icon(Icons.arrow_drop_down, size: 20),
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              fontWeight: FontWeight.w500,
+                    const SizedBox(height: 12),
+                    
+                    // Filters Row
+                    Row(
+                      children: [
+                        Expanded(
+                          flex: 6,
+                          child: SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            physics: const BouncingScrollPhysics(),
+                            child: Row(
+                              children: [
+                                _buildSortChip('closest', 'Near', Icons.my_location),
+                                const SizedBox(width: 6),
+                                _buildSortChip('recent', 'New', Icons.access_time),
+                                const SizedBox(width: 6),
+                                _buildSortChip('urgent', 'Urgent', Icons.local_fire_department),
+                              ],
                             ),
-                            items: ['All', ...AppConstants.jimmaKebeles]
-                                .map((k) => DropdownMenuItem(
-                                      value: k,
-                                      child: Text(
-                                        k == 'All' ? 'Everywhere' : k,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ))
-                                .toList(),
-                            onChanged: (v) {
-                              if (v != null) {
-                                setState(() {
-                                  _currentFilter = FeedFilter(
-                                    sort: _currentFilter.sort,
-                                    search: _currentFilter.search,
-                                    kebele: v,
-                                  );
-                                });
-                              }
-                            },
                           ),
                         ),
-                      ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          flex: 4,
+                          child: Container(
+                            height: 38,
+                            padding: const EdgeInsets.symmetric(horizontal: 14),
+                            decoration: BoxDecoration(
+                              border: Border.all(
+                                color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.5),
+                              ),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: DropdownButtonHideUnderline(
+                              child: DropdownButton<String>(
+                                value: _currentFilter.kebele,
+                                isExpanded: true,
+                                icon: const Icon(Icons.arrow_drop_down_rounded, size: 24),
+                                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                ),
+                                items: ['All', ...AppConstants.jimmaKebeles]
+                                    .map((k) => DropdownMenuItem(
+                                          value: k,
+                                          child: Text(
+                                            k == 'All' ? 'Everywhere' : k,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ))
+                                    .toList(),
+                                onChanged: (v) {
+                                  if (v != null) {
+                                    setState(() {
+                                      _currentFilter = FeedFilter(
+                                        sort: _currentFilter.sort,
+                                        search: _currentFilter.search,
+                                        kebele: v,
+                                      );
+                                    });
+                                  }
+                                },
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
-              ],
-            ),
-          ),
-          
-          // ── Feed List ──────────────────────────────────────────────────────
-          Expanded(
-            child: feedState.when(
-        data: (issues) {
-          if (issues.isEmpty) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.forum_outlined,
-                    size: 64,
-                    color: Theme.of(context).colorScheme.outline,
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'No issues reported yet.',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          color: Theme.of(context).colorScheme.outline,
-                        ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Be the first to report a problem!',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Theme.of(context).colorScheme.outline,
-                        ),
-                  ),
-                ],
               ),
-            );
-          }
-          return RefreshIndicator(
-            onRefresh: () => ref.read(feedProvider(_currentFilter).notifier).refresh(),
-            child: ListView.separated(
-              padding: const EdgeInsets.fromLTRB(12, 12, 12, 100),
-              itemCount: issues.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 10),
-              itemBuilder: (context, index) => IssueCard(issue: issues[index]),
-            ),
-          );
-        },
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, st) => Center(
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.wifi_off_rounded,
-                  size: 64,
-                  color: Theme.of(context).colorScheme.error,
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  'Could not load reports',
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  e.toString(),
-                  style: Theme.of(context).textTheme.bodySmall,
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 24),
-                FilledButton.icon(
-                  onPressed: () => ref.read(feedProvider(_currentFilter).notifier).refresh(),
-                  icon: const Icon(Icons.refresh),
-                  label: const Text('Retry'),
-                ),
-              ],
-            ),
             ),
           ),
-        ),
+
+          // ── Feed List ──────────────────────────────────────────────
+          feedState.when(
+            data: (issues) {
+              if (issues.isEmpty) {
+                return SliverFillRemaining(
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.forum_outlined,
+                          size: 64,
+                          color: Theme.of(context).colorScheme.outline,
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          'No issues reported yet.',
+                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                color: Theme.of(context).colorScheme.outline,
+                              ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Be the first to report a problem!',
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                color: Theme.of(context).colorScheme.outline,
+                              ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }
+              return SliverPadding(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
+                sliver: SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    (context, index) {
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: IssueCard(issue: issues[index]),
+                      );
+                    },
+                    childCount: issues.length,
+                  ),
+                ),
+              );
+            },
+            loading: () => const SliverFillRemaining(
+              child: Center(child: CircularProgressIndicator()),
+            ),
+            error: (e, st) => SliverFillRemaining(
+              child: Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(32),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.wifi_off_rounded, size: 64, color: Colors.red),
+                      const SizedBox(height: 16),
+                      Text(
+                        'Unable to load feed',
+                        style: Theme.of(context).textTheme.titleLarge,
+                      ),
+                      const SizedBox(height: 8),
+                      Text(e.toString(), textAlign: TextAlign.center),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
-      ],
-    ),
     );
   }
 
-  // Helper to build nice selection chips based on active sort
-  Widget _buildSortChip(String sortValue, String label, IconData icon) {
-    final isActive = _currentFilter.sort == sortValue;
-    return FilterChip(
-      selected: isActive,
+  Widget _buildSortChip(String value, String label, IconData icon) {
+    final isSelected = _currentFilter.sort == value;
+    final theme = Theme.of(context);
+    
+    return ChoiceChip(
       label: Text(label),
-      avatar: Icon(icon, size: 18, color: isActive ? Theme.of(context).colorScheme.onPrimary : null),
-      selectedColor: Theme.of(context).colorScheme.primary,
+      avatar: isSelected ? null : Icon(icon, size: 16, color: theme.colorScheme.onSurfaceVariant),
+      selected: isSelected,
+      showCheckmark: isSelected,
+      padding: const EdgeInsets.symmetric(horizontal: 4),
       labelStyle: TextStyle(
-        color: isActive ? Theme.of(context).colorScheme.onPrimary : null,
-        fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
+        fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+        color: isSelected ? theme.colorScheme.onSecondaryContainer : theme.colorScheme.onSurfaceVariant,
       ),
-      onSelected: (_) {
-        setState(() {
-          _currentFilter = FeedFilter(
-            sort: sortValue,
-            kebele: _currentFilter.kebele,
-            search: _currentFilter.search,
-          );
-        });
+      backgroundColor: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+      selectedColor: theme.colorScheme.secondaryContainer,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+        side: isSelected 
+            ? BorderSide(color: theme.colorScheme.primary.withValues(alpha: 0.3), width: 1.5)
+            : BorderSide.none,
+      ),
+      onSelected: (selected) {
+        if (selected) {
+          setState(() {
+            _currentFilter = FeedFilter(
+              sort: value,
+              search: _currentFilter.search,
+              kebele: _currentFilter.kebele,
+            );
+          });
+        }
       },
     );
   }
 
-  Widget _buildNotificationBell(BuildContext context, WidgetRef ref, List<LocalNotification> notifications) {
-    return Badge(
-      isLabelVisible: notifications.isNotEmpty,
-      label: Text(notifications.length > 9 ? '9+' : notifications.length.toString()),
-      backgroundColor: Colors.red,
-      offset: const Offset(-4, 4),
-      child: IconButton(
-        icon: const Icon(Icons.notifications_none_rounded),
-        tooltip: 'Notifications',
-        onPressed: () => _showNotificationsSheet(context),
-      ),
+  Widget _buildNotificationBell(
+      BuildContext context, WidgetRef ref, List<dynamic> notifications) {
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        IconButton(
+          icon: const Icon(Icons.notifications_none_rounded),
+          onPressed: () => _showNotificationsSheet(context, ref),
+        ),
+        if (notifications.isNotEmpty)
+          Positioned(
+            right: 12,
+            top: 12,
+            child: Container(
+              padding: const EdgeInsets.all(2),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.error,
+                shape: BoxShape.circle,
+              ),
+              constraints: const BoxConstraints(minWidth: 8, minHeight: 8),
+            ),
+          ),
+      ],
     );
   }
 
-  void _showNotificationsSheet(BuildContext context) {
+  void _showNotificationsSheet(BuildContext context, WidgetRef ref) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -330,6 +358,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
     );
   }
 }
+
 class _NotificationsSheet extends ConsumerWidget {
   const _NotificationsSheet();
 
@@ -350,80 +379,110 @@ class _NotificationsSheet extends ConsumerWidget {
           child: SizedBox(
             height: MediaQuery.of(context).size.height * 0.6,
             child: Column(
-            children: [
-              const SizedBox(height: 12),
-              Container(width: 40, height: 4, decoration: BoxDecoration(color: theme.colorScheme.outlineVariant, borderRadius: BorderRadius.circular(4))),
-              const SizedBox(height: 16),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text('Notifications', style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
-                    if (notifications.isNotEmpty)
-                      TextButton(
-                        onPressed: () {
-                          ref.read(notificationsProvider.notifier).clearHistory();
-                          Navigator.pop(context);
-                        },
-                        child: const Text('Clear All'),
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                  decoration: BoxDecoration(
+                    border: Border(
+                      bottom: BorderSide(
+                        color: theme.colorScheme.outlineVariant.withValues(alpha: 0.3),
                       ),
-                  ],
-                ),
-              ),
-              const Divider(),
-              if (notifications.isEmpty)
-                const Expanded(
-                  child: Center(child: Text('No recent notifications')),
-                )
-              else
-                Expanded(
-                  child: ListView.separated(
-                    itemCount: notifications.length,
-                    separatorBuilder: (_, __) => const Divider(height: 1),
-                    itemBuilder: (context, index) {
-                      final n = notifications[index];
-                      final timeString = "${n.timestamp.hour}:${n.timestamp.minute.toString().padLeft(2, '0')}";
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            CircleAvatar(
-                              backgroundColor: theme.colorScheme.primaryContainer,
-                              child: Icon(Icons.check_circle, color: theme.colorScheme.primary),
-                            ),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(n.title, style: const TextStyle(fontWeight: FontWeight.bold)),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    n.body,
-                                    maxLines: 2, 
-                                    overflow: TextOverflow.ellipsis,
-                                    style: theme.textTheme.bodyMedium?.copyWith(
-                                      color: theme.colorScheme.onSurfaceVariant,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const SizedBox(width: 16),
-                            Text(timeString, style: theme.textTheme.bodySmall),
-                          ],
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Notifications',
+                        style: theme.textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
                         ),
-                      );
-                    },
+                      ),
+                      if (notifications.isNotEmpty)
+                        TextButton(
+                          onPressed: () {
+                            ref.read(notificationsProvider.notifier).clearHistory();
+                          },
+                          child: const Text('Clear All'),
+                        ),
+                    ],
                   ),
                 ),
-            ],
+                if (notifications.isEmpty)
+                  Expanded(
+                    child: Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.notifications_off_outlined,
+                            size: 48,
+                            color: theme.colorScheme.outlineVariant,
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            'You\'re all caught up!',
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              color: theme.colorScheme.outline,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  )
+                else
+                  Expanded(
+                    child: ListView.separated(
+                      itemCount: notifications.length,
+                      separatorBuilder: (_, __) => const Divider(height: 1),
+                      itemBuilder: (context, index) {
+                        final n = notifications[index];
+                        final timeString =
+                            "${n.timestamp.hour}:${n.timestamp.minute.toString().padLeft(2, '0')}";
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              CircleAvatar(
+                                backgroundColor: theme.colorScheme.primaryContainer,
+                                child: Icon(Icons.info_outline_rounded,
+                                    color: theme.colorScheme.primary),
+                              ),
+                              const SizedBox(width: 16),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      n.title,
+                                      style: const TextStyle(fontWeight: FontWeight.bold),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      n.body,
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: theme.textTheme.bodyMedium?.copyWith(
+                                        color: theme.colorScheme.onSurfaceVariant,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(width: 16),
+                              Text(timeString, style: theme.textTheme.bodySmall),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+              ],
+            ),
           ),
         ),
       ),
-    ),
-  );
+    );
   }
 }
