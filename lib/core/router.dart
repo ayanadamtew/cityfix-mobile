@@ -6,7 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../features/auth/screens/login_screen.dart';
 import '../features/auth/screens/register_screen.dart';
 import '../features/feed/screens/feed_screen.dart';
-import '../features/feed/screens/comment_screen.dart';
+import '../features/feed/screens/report_detail_screen.dart';
 import '../features/report_issue/screens/report_screen.dart';
 import '../features/my_reports/screens/my_reports_screen.dart';
 import '../features/profile/screens/profile_screen.dart';
@@ -161,7 +161,7 @@ final routerProvider = Provider<GoRouter>((ref) {
               GoRoute(
                 path: 'comments/:issueId',
                 builder: (_, state) =>
-                    CommentScreen(issueId: state.pathParameters['issueId']!),
+                    ReportDetailScreen(issueId: state.pathParameters['issueId']!),
               ),
             ],
           ),
