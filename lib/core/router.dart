@@ -31,6 +31,7 @@ class _AppShellState extends State<_AppShell> {
 
   static const _tabs = [
     '/feed',
+    '/search', // placeholder or integrated search
     '/my-reports',
     '/profile',
   ];
@@ -86,32 +87,62 @@ class _AppShellState extends State<_AppShell> {
               ),
             )
           : null,
-      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: AnimatedContainer(
         duration: const Duration(milliseconds: 300),
-        height: _isBottomBarVisible ? 80.0 : 0.0,
-        child: Wrap(
+        height: _isBottomBarVisible ? 70.0 : 0.0,
+        child: _isBottomBarVisible 
+          ? BottomAppBar(
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+              shape: const CircularNotchedRectangle(),
+              notchMargin: 8,
+              color: theme.colorScheme.surface,
+              elevation: 0,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                   _buildNavItem(0, Icons.home_outlined, Icons.home, AppLocalizations.of(context)!.navFeed, context),
+                   _buildNavItem(1, Icons.search_outlined, Icons.search, AppLocalizations.of(context)!.navSearch, context),
+                   const SizedBox(width: 48), // FAB Space
+                   _buildNavItem(2, Icons.list_alt_outlined, Icons.list_alt, AppLocalizations.of(context)!.navMyReports, context),
+                   _buildNavItem(3, Icons.person_outline, Icons.person, AppLocalizations.of(context)!.navProfile, context),
+                ],
+              ),
+            )
+          : const SizedBox.shrink(),
+      ),
+    );
+  }
+
+  Widget _buildNavItem(int index, IconData icon, IconData selectedIcon, String label, BuildContext context) {
+    final isSelected = _selectedIndex == index;
+    final theme = Theme.of(context);
+    final color = isSelected 
+        ? theme.colorScheme.primary 
+        : theme.colorScheme.onSurfaceVariant;
+    
+    return Expanded(
+      child: InkWell(
+        onTap: () => context.go(_tabs[index]),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            NavigationBar(
-              selectedIndex: _selectedIndex,
-              onDestinationSelected: (i) => context.go(_tabs[i]),
-              destinations: [
-                NavigationDestination(
-                  icon: const Icon(Icons.home_outlined),
-                  selectedIcon: const Icon(Icons.home),
-                  label: AppLocalizations.of(context)!.navFeed,
-                ),
-                NavigationDestination(
-                  icon: const Icon(Icons.list_alt_outlined),
-                  selectedIcon: const Icon(Icons.list_alt),
-                  label: AppLocalizations.of(context)!.navMyReports,
-                ),
-                NavigationDestination(
-                  icon: const Icon(Icons.person_outline),
-                  selectedIcon: const Icon(Icons.person),
-                  label: AppLocalizations.of(context)!.navProfile,
-                ),
-              ],
+            Icon(
+              isSelected ? selectedIcon : icon,
+              color: color,
+              size: 26,
+            ),
+            const SizedBox(height: 2),
+            Text(
+              label,
+              style: TextStyle(
+                color: color,
+                fontSize: 11,
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
           ],
         ),
@@ -166,6 +197,10 @@ final routerProvider = Provider<GoRouter>((ref) {
                     ReportDetailScreen(issueId: state.pathParameters['issueId']!),
               ),
             ],
+          ),
+          GoRoute(
+            path: '/search',
+            builder: (_, __) => const FeedScreen(isSearchFocused: true), // Example: reusing feed with focus
           ),
           GoRoute(
             path: '/report',

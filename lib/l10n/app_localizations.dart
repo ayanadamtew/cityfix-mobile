@@ -670,6 +670,12 @@ abstract class AppLocalizations {
   /// **'Feed'**
   String get navFeed;
 
+  /// No description provided for @navSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Search'**
+  String get navSearch;
+
   /// No description provided for @navMyReports.
   ///
   /// In en, this message translates to:

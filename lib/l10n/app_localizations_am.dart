@@ -313,6 +313,9 @@ class AppLocalizationsAm extends AppLocalizations {
   String get navFeed => 'ዜና';
 
   @override
+  String get navSearch => 'ፈልግ';
+
+  @override
   String get navMyReports => 'ሪፖርቶቼ';
 
   @override

@@ -315,6 +315,9 @@ class AppLocalizationsOm extends AppLocalizations {
   String get navFeed => 'Oduu';
 
   @override
+  String get navSearch => 'Barbaadi';
+
+  @override
   String get navMyReports => 'Gabaasawwan Koo';
 
   @override

@@ -316,6 +316,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get navFeed => 'Feed';
 
   @override
+  String get navSearch => 'Search';
+
+  @override
   String get navMyReports => 'My Reports';
 
   @override

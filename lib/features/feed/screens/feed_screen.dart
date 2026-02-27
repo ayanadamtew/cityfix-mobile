@@ -10,7 +10,9 @@ import '../widgets/issue_card.dart';
 import '../../notifications/providers/notifications_provider.dart';
 
 class FeedScreen extends ConsumerStatefulWidget {
-  const FeedScreen({super.key});
+  const FeedScreen({super.key, this.isSearchFocused = false});
+
+  final bool isSearchFocused;
 
   @override
   ConsumerState<FeedScreen> createState() => _FeedScreenState();
@@ -19,8 +21,14 @@ class FeedScreen extends ConsumerStatefulWidget {
 class _FeedScreenState extends ConsumerState<FeedScreen> {
   FeedFilter _currentFilter = const FeedFilter();
   Timer? _debounce;
-  bool _isSearching = false;
+  late bool _isSearching;
   final TextEditingController _searchController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _isSearching = widget.isSearchFocused;
+  }
 
   @override
   void dispose() {
@@ -98,18 +106,6 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                     ],
                   ),
             actions: [
-              IconButton(
-                icon: Icon(_isSearching ? Icons.close_rounded : Icons.search_rounded),
-                onPressed: () {
-                  setState(() {
-                    _isSearching = !_isSearching;
-                    if (!_isSearching) {
-                      _searchController.clear();
-                      _currentFilter = _currentFilter.copyWith(search: '');
-                    }
-                  });
-                },
-              ),
               _buildNotificationBell(context, ref, notifications, l),
               const SizedBox(width: 8),
             ],
