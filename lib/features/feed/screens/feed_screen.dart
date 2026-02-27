@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/constants.dart';
 import '../providers/feed_provider.dart';
 import '../widgets/issue_card.dart';
+import '../../notifications/providers/notifications_provider.dart';
 
 class FeedScreen extends ConsumerStatefulWidget {
   const FeedScreen({super.key});
@@ -30,6 +31,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
   Widget build(BuildContext context) {
     // Watch the provider using our filter object
     final feedState = ref.watch(feedProvider(_currentFilter));
+    final notifications = ref.watch(notificationsProvider);
 
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surfaceContainerLowest,
@@ -53,11 +55,13 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
           ],
         ),
         actions: [
+          _buildNotificationBell(context, ref, notifications),
           IconButton(
             icon: const Icon(Icons.person_outline),
             tooltip: 'Profile',
             onPressed: () => context.go('/profile'),
           ),
+          const SizedBox(width: 8),
         ],
       ),
       body: Column(
@@ -301,5 +305,125 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
         });
       },
     );
+  }
+
+  Widget _buildNotificationBell(BuildContext context, WidgetRef ref, List<LocalNotification> notifications) {
+    return Badge(
+      isLabelVisible: notifications.isNotEmpty,
+      label: Text(notifications.length > 9 ? '9+' : notifications.length.toString()),
+      backgroundColor: Colors.red,
+      offset: const Offset(-4, 4),
+      child: IconButton(
+        icon: const Icon(Icons.notifications_none_rounded),
+        tooltip: 'Notifications',
+        onPressed: () => _showNotificationsSheet(context),
+      ),
+    );
+  }
+
+  void _showNotificationsSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => const _NotificationsSheet(),
+    );
+  }
+}
+class _NotificationsSheet extends ConsumerWidget {
+  const _NotificationsSheet();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final notifications = ref.watch(notificationsProvider);
+    final theme = Theme.of(context);
+
+    return Material(
+      color: Colors.transparent,
+      child: Container(
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surface,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+        child: SafeArea(
+          child: SizedBox(
+            height: MediaQuery.of(context).size.height * 0.6,
+            child: Column(
+            children: [
+              const SizedBox(height: 12),
+              Container(width: 40, height: 4, decoration: BoxDecoration(color: theme.colorScheme.outlineVariant, borderRadius: BorderRadius.circular(4))),
+              const SizedBox(height: 16),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('Notifications', style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+                    if (notifications.isNotEmpty)
+                      TextButton(
+                        onPressed: () {
+                          ref.read(notificationsProvider.notifier).clearHistory();
+                          Navigator.pop(context);
+                        },
+                        child: const Text('Clear All'),
+                      ),
+                  ],
+                ),
+              ),
+              const Divider(),
+              if (notifications.isEmpty)
+                const Expanded(
+                  child: Center(child: Text('No recent notifications')),
+                )
+              else
+                Expanded(
+                  child: ListView.separated(
+                    itemCount: notifications.length,
+                    separatorBuilder: (_, __) => const Divider(height: 1),
+                    itemBuilder: (context, index) {
+                      final n = notifications[index];
+                      final timeString = "${n.timestamp.hour}:${n.timestamp.minute.toString().padLeft(2, '0')}";
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            CircleAvatar(
+                              backgroundColor: theme.colorScheme.primaryContainer,
+                              child: Icon(Icons.check_circle, color: theme.colorScheme.primary),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(n.title, style: const TextStyle(fontWeight: FontWeight.bold)),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    n.body,
+                                    maxLines: 2, 
+                                    overflow: TextOverflow.ellipsis,
+                                    style: theme.textTheme.bodyMedium?.copyWith(
+                                      color: theme.colorScheme.onSurfaceVariant,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Text(timeString, style: theme.textTheme.bodySmall),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ),
+    ),
+  );
   }
 }

@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../../auth/providers/auth_provider.dart';
 
 import '../../my_reports/providers/my_reports_provider.dart';
+import '../providers/settings_provider.dart';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
@@ -29,6 +30,9 @@ class ProfileScreen extends ConsumerWidget {
       totalReports = reports.length;
       resolvedReports = reports.where((r) => r.status == 'Resolved').length;
     }
+
+    final settings = ref.watch(settingsProvider);
+    final isPushEnabled = settings['pushNotifications'] ?? true;
 
     return Scaffold(
       appBar: AppBar(
@@ -198,10 +202,14 @@ class ProfileScreen extends ConsumerWidget {
                   icon: Icons.notifications_active_rounded,
                   title: 'Push Notifications',
                   trailing: Switch(
-                    value: true,
+                    value: isPushEnabled,
                     onChanged: (val) {
+                      ref.read(settingsProvider.notifier).togglePushNotifications(val);
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Notification settings coming soon!')),
+                        SnackBar(
+                          content: Text(val ? 'Push Notifications Enabled.' : 'Push Notifications Disabled.'),
+                          behavior: SnackBarBehavior.floating,
+                        ),
                       );
                     },
                   ),
@@ -211,8 +219,19 @@ class ProfileScreen extends ConsumerWidget {
                   icon: Icons.privacy_tip_rounded,
                   title: 'Privacy Policy',
                   onTap: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Privacy Policy coming soon!')),
+                    showModalBottomSheet(
+                      context: context,
+                      isScrollControlled: true,
+                      shape: const RoundedRectangleBorder(
+                        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+                      ),
+                      builder: (context) => DraggableScrollableSheet(
+                        initialChildSize: 0.6,
+                        minChildSize: 0.4,
+                        maxChildSize: 0.9,
+                        expand: false,
+                        builder: (_, controller) => _buildPolicySheet(context, controller),
+                      ),
                     );
                   },
                 ),
@@ -221,8 +240,20 @@ class ProfileScreen extends ConsumerWidget {
                   icon: Icons.help_outline_rounded,
                   title: 'Help & Support',
                   onTap: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Support Center coming soon!')),
+                    showDialog(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        title: const Text('Help & Support'),
+                        content: const Text(
+                          'If you need assistance using the CityFix app, please contact the Jimma City municipal office at support@cityfix.com or call 911 for emergencies.',
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(context),
+                            child: const Text('Close'),
+                          ),
+                        ],
+                      ),
                     );
                   },
                 ),
@@ -251,7 +282,51 @@ class ProfileScreen extends ConsumerWidget {
               ),
             ),
           ),
-          const SizedBox(height: 32),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPolicySheet(BuildContext context, ScrollController controller) {
+    return Padding(
+      padding: const EdgeInsets.all(24.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Center(
+            child: Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.outlineVariant,
+                borderRadius: BorderRadius.circular(4),
+              ),
+            ),
+          ),
+          const SizedBox(height: 24),
+          Text(
+            'Privacy Policy',
+            style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 16),
+          Expanded(
+            child: ListView(
+              controller: controller,
+              children: [
+                Text(
+                  'Your privacy is important to us. This policy explains how we handle your data.',
+                  style: Theme.of(context).textTheme.bodyLarge,
+                ),
+                const SizedBox(height: 16),
+                const Text('1. Data Collection\nWe collect location and photo data strictly for public civic issue reporting, minimizing personal telemetry.'),
+                const SizedBox(height: 12),
+                const Text('2. Data Security\nWe encrypt your data aligning with standard municipality guidelines.'),
+                const SizedBox(height: 12),
+                const Text('3. Push notifications\nWe use Firebase Cloud Messaging securely to update you on issue resolutions locally.'),
+                const SizedBox(height: 32),
+              ],
+            ),
+          ),
         ],
       ),
     );

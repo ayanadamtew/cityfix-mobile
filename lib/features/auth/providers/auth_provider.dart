@@ -1,8 +1,10 @@
 // lib/features/auth/providers/auth_provider.dart
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:dio/dio.dart';
 import '../../../core/api_client.dart';
+import '../../../core/push_notification_service.dart';
 
 // ---------------------------------------------------------------------------
 // Current user stream provider
@@ -101,6 +103,13 @@ class AuthNotifier extends AsyncNotifier<UserProfile?> {
           'firebaseUid': user.uid,
         },
       );
+      
+      // Ensure the newly authenticated Mongo session has the device's FCM token
+      final fcmToken = await FirebaseMessaging.instance.getToken();
+      if (fcmToken != null) {
+        await PushNotificationService.syncTokenWithBackend(fcmToken);
+      }
+
       return UserProfile.fromJson(resp.data as Map<String, dynamic>);
     } on DioException catch (_) {
       // Tolerate backend errors (e.g., user already registered)
