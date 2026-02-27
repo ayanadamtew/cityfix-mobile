@@ -5,6 +5,8 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
 import 'package:go_router/go_router.dart';
+import 'package:cityfix_mobile/l10n/app_localizations.dart';
+import 'package:cityfix_mobile/shared/l10n_extensions.dart';
 import '../providers/feed_provider.dart';
 import '../../../shared/issue_status_badge.dart';
 import '../../auth/providers/auth_provider.dart';
@@ -39,6 +41,7 @@ class IssueCard extends ConsumerWidget {
     final theme = Theme.of(context);
     final catColor = _categoryColor(issue.category);
     final catIcon = _categoryIcon(issue.category);
+    final l = AppLocalizations.of(context)!;
 
     final firebaseUser = FirebaseAuth.instance.currentUser;
     final currentUser = ref.watch(authNotifierProvider).valueOrNull;
@@ -116,7 +119,7 @@ class IssueCard extends ConsumerWidget {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  issue.authorName ?? 'Anonymous Citizen',
+                                  issue.authorName ?? l.anonymousCitizen,
                                   style: theme.textTheme.titleSmall?.copyWith(
                                     fontWeight: FontWeight.w700,
                                   ),
@@ -146,7 +149,7 @@ class IssueCard extends ConsumerWidget {
                                 Icon(catIcon, size: 12, color: catColor),
                                 const SizedBox(width: 4),
                                 Text(
-                                  issue.category,
+                                  l.translateCategory(issue.category),
                                   style: TextStyle(
                                     color: catColor,
                                     fontSize: 11,
@@ -172,7 +175,7 @@ class IssueCard extends ConsumerWidget {
                                       children: [
                                         Icon(Icons.flag_outlined, size: 20, color: theme.colorScheme.error),
                                         const SizedBox(width: 8),
-                                        Text('Report Issue', style: TextStyle(color: theme.colorScheme.error)),
+                                        Text(l.reportIssueMenu, style: TextStyle(color: theme.colorScheme.error)),
                                       ],
                                     ),
                                   ),
@@ -184,11 +187,11 @@ class IssueCard extends ConsumerWidget {
                                       context: context,
                                       builder: (ctx) {
                                         return AlertDialog(
-                                          title: const Text('Report Issue'),
+                                          title: Text(l.reportDialogTitle),
                                           content: TextField(
-                                            decoration: const InputDecoration(
-                                              labelText: 'Reason',
-                                              hintText: 'Why is this issue unnecessary or inappropriate?',
+                                            decoration: InputDecoration(
+                                              labelText: l.reportDialogReason,
+                                              hintText: l.reportDialogHint,
                                             ),
                                             maxLines: 3,
                                             onChanged: (val) => currentReason = val,
@@ -196,11 +199,11 @@ class IssueCard extends ConsumerWidget {
                                           actions: [
                                             TextButton(
                                               onPressed: () => Navigator.pop(ctx),
-                                              child: const Text('Cancel'),
+                                              child: Text(l.cancel),
                                             ),
                                             FilledButton(
                                               onPressed: () => Navigator.pop(ctx, currentReason),
-                                              child: const Text('Submit'),
+                                              child: Text(l.submit),
                                             ),
                                           ],
                                         );
@@ -212,13 +215,13 @@ class IssueCard extends ConsumerWidget {
                                         await ref.read(feedProvider(const FeedFilter()).notifier).reportIssue(issue.id, reason);
                                         if (context.mounted) {
                                           ScaffoldMessenger.of(context).showSnackBar(
-                                            const SnackBar(content: Text('Issue reported for review successfully.')),
+                                            SnackBar(content: Text(l.reportedForReview)),
                                           );
                                         }
                                       } catch (e) {
                                         if (context.mounted) {
                                           ScaffoldMessenger.of(context).showSnackBar(
-                                            const SnackBar(content: Text('Failed to report issue.')),
+                                            SnackBar(content: Text(l.failedToReport)),
                                           );
                                         }
                                       }
@@ -333,7 +336,9 @@ class IssueCard extends ConsumerWidget {
                                   ),
                                   const SizedBox(width: 6),
                                   Text(
-                                    hasVoted ? 'Upvoted (${issue.urgencyScore})' : 'Upvote (${issue.urgencyScore})',
+                                    hasVoted
+                                        ? l.upvoted(issue.urgencyScore)
+                                        : l.upvote(issue.urgencyScore),
                                     style: TextStyle(
                                       color: hasVoted
                                           ? theme.colorScheme.primary
@@ -380,8 +385,8 @@ class IssueCard extends ConsumerWidget {
             ),
                 // ── Bubble Tail ──
                 Positioned(
-                  left: -11, // Shift left by width-1 to overlap border
-                  top: 24, // Placing beneath the top-left radius curve of 24
+                  left: -11,
+                  top: 24,
                   child: CustomPaint(
                     size: const Size(12, 16),
                     painter: _BubbleTailPainter(
@@ -415,8 +420,8 @@ class _BubbleTailPainter extends CustomPainter {
 
     final path = Path()
       ..moveTo(size.width, 0)
-      ..quadraticBezierTo(size.width * 0.3, 0, 0, size.height * 0.4) // smooth downward curve to the tip
-      ..quadraticBezierTo(size.width * 0.3, size.height, size.width, size.height) // smooth curve back to the container
+      ..quadraticBezierTo(size.width * 0.3, 0, 0, size.height * 0.4)
+      ..quadraticBezierTo(size.width * 0.3, size.height, size.width, size.height)
       ..close();
 
     canvas.drawPath(path, paintFill);

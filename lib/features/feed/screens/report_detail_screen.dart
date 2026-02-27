@@ -5,6 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:go_router/go_router.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:cityfix_mobile/l10n/app_localizations.dart';
+import 'package:cityfix_mobile/shared/l10n_extensions.dart';
 import '../providers/feed_provider.dart';
 import '../../../core/api_client.dart';
 import '../../../shared/issue_status_badge.dart';
@@ -76,6 +78,7 @@ class _ReportDetailScreenState extends ConsumerState<ReportDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l = AppLocalizations.of(context)!;
     final commentsAsync = ref.watch(commentsProvider(widget.issueId));
     
     // We try to find the issue in the feed provider first
@@ -90,14 +93,14 @@ class _ReportDetailScreenState extends ConsumerState<ReportDetailScreen> {
        // If not in feed, we could fetch it individually, but for now we'll show a loader
        // or handle the case where it's truly not found if we had a dedicated single issue provider.
        return Scaffold(
-         appBar: AppBar(title: const Text('Report Detail')),
+         appBar: AppBar(title: Text(l.reportDetail)),
          body: const Center(child: CircularProgressIndicator()),
        );
     }
 
     if (issue == null) {
       return Scaffold(
-         appBar: AppBar(title: const Text('Report Detail')),
+         appBar: AppBar(title: Text(l.reportDetail)),
          body: const Center(child: CircularProgressIndicator()),
       );
     }
@@ -185,7 +188,7 @@ class _ReportDetailScreenState extends ConsumerState<ReportDetailScreen> {
                                   Icon(catIcon, size: 16, color: catColor),
                                   const SizedBox(width: 6),
                                   Text(
-                                    issue.category,
+                                    l.translateCategory(issue.category),
                                     style: TextStyle(
                                       color: catColor,
                                       fontWeight: FontWeight.bold,
@@ -223,7 +226,7 @@ class _ReportDetailScreenState extends ConsumerState<ReportDetailScreen> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  issue.authorName ?? 'Anonymous Citizen',
+                                  issue.authorName ?? l.anonymousCitizen,
                                   style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
                                 ),
                                 Text(
@@ -239,7 +242,7 @@ class _ReportDetailScreenState extends ConsumerState<ReportDetailScreen> {
                         const SizedBox(height: 16),
                         // Description
                         Text(
-                          'Description',
+                          l.description,
                           style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                         ),
                         const SizedBox(height: 8),
@@ -258,7 +261,7 @@ class _ReportDetailScreenState extends ConsumerState<ReportDetailScreen> {
                                Icon(Icons.location_on_outlined, color: theme.colorScheme.primary, size: 20),
                                const SizedBox(width: 8),
                                Text(
-                                 'Report Location',
+                                 l.reportLocation,
                                  style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                                ),
                              ],
@@ -282,12 +285,12 @@ class _ReportDetailScreenState extends ConsumerState<ReportDetailScreen> {
                             const Icon(Icons.forum_outlined, size: 20),
                             const SizedBox(width: 8),
                             Text(
-                              'Community Discussion',
+                              l.communityDiscussion,
                               style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                             ),
                             const Spacer(),
                             Text(
-                              '${issue.commentCount} comments',
+                              l.commentsCount(issue.commentCount),
                               style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.outline),
                             ),
                           ],
@@ -302,11 +305,11 @@ class _ReportDetailScreenState extends ConsumerState<ReportDetailScreen> {
                 commentsAsync.when(
                   data: (comments) {
                     if (comments.isEmpty) {
-                      return const SliverToBoxAdapter(
+                      return SliverToBoxAdapter(
                         child: Padding(
                           padding: EdgeInsets.symmetric(vertical: 40),
                           child: Center(
-                            child: Text('No comments yet. Start the conversation!'),
+                            child: Text(l.noCommentsYet),
                           ),
                         ),
                       );
@@ -360,7 +363,7 @@ class _ReportDetailScreenState extends ConsumerState<ReportDetailScreen> {
                     controller: _commentCtrl,
                     maxLines: null,
                     decoration: InputDecoration(
-                      hintText: 'Add a helpful comment...',
+                      hintText: l.commentHint,
                       filled: true,
                       fillColor: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
                       border: OutlineInputBorder(

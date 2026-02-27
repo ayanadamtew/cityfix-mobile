@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:cityfix_mobile/l10n/app_localizations.dart';
 import '../providers/auth_provider.dart';
 import '../../../shared/custom_text_field.dart';
 
@@ -52,10 +53,11 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   Widget build(BuildContext context) {
     final isLoading = ref.watch(authNotifierProvider).isLoading;
     final cs = Theme.of(context).colorScheme;
+    final l = AppLocalizations.of(context)!;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Create Account'),
+        title: Text(l.createAccount),
         leading: BackButton(onPressed: () => context.go('/login')),
       ),
       body: SafeArea(
@@ -69,32 +71,32 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 Icon(Icons.person_add_rounded, size: 64, color: cs.primary),
                 const SizedBox(height: 32),
                 CustomTextField(
-                  label: 'Full Name',
-                  hint: 'Abebe Bekele',
+                  label: l.fullName,
+                  hint: l.fullNameHint,
                   controller: _nameCtrl,
                   textInputAction: TextInputAction.next,
                   prefixIcon: const Icon(Icons.person_outlined),
                   validator: (v) => (v == null || v.isEmpty)
-                      ? 'Name is required'
+                      ? l.fullNameRequired
                       : null,
                 ),
                 const SizedBox(height: 16),
                 CustomTextField(
-                  label: 'Email',
-                  hint: 'you@example.com',
+                  label: l.email,
+                  hint: l.emailHint,
                   controller: _emailCtrl,
                   keyboardType: TextInputType.emailAddress,
                   textInputAction: TextInputAction.next,
                   prefixIcon: const Icon(Icons.email_outlined),
                   validator: (v) {
-                    if (v == null || v.isEmpty) return 'Email is required';
-                    if (!v.contains('@')) return 'Enter a valid email';
+                    if (v == null || v.isEmpty) return l.emailRequired;
+                    if (!v.contains('@')) return l.emailInvalid;
                     return null;
                   },
                 ),
                 const SizedBox(height: 16),
                 CustomTextField(
-                  label: 'Password',
+                  label: l.password,
                   controller: _passCtrl,
                   obscureText: _obscure,
                   textInputAction: TextInputAction.done,
@@ -106,7 +108,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   ),
                   validator: (v) {
                     if (v == null || v.length < 6) {
-                      return 'Password must be at least 6 characters';
+                      return l.passwordRequired;
                     }
                     return null;
                   },
@@ -116,12 +118,12 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     ? const Center(child: CircularProgressIndicator())
                     : FilledButton(
                         onPressed: _submit,
-                        child: const Text('Create Account'),
+                        child: Text(l.createAccount),
                       ),
                 const SizedBox(height: 16),
                 TextButton(
                   onPressed: () => context.go('/login'),
-                  child: const Text('Already have an account? Login'),
+                  child: Text(l.alreadyHaveAccount),
                 ),
               ],
             ),

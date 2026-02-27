@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:intl/intl.dart';
+import 'package:cityfix_mobile/l10n/app_localizations.dart';
+import 'package:cityfix_mobile/shared/l10n_extensions.dart';
 import '../../../core/constants.dart';
 import '../../feed/providers/feed_provider.dart';
 import '../../../shared/issue_status_badge.dart';
@@ -52,6 +54,7 @@ class MyReportCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final l = AppLocalizations.of(context)!;
     final catColor = _categoryColor(issue.category);
     final catIcon = _categoryIcon(issue.category);
 
@@ -146,7 +149,7 @@ class MyReportCard extends ConsumerWidget {
                             Icon(catIcon, size: 12, color: catColor),
                             const SizedBox(width: 4),
                             Text(
-                              issue.category,
+                              l.translateCategory(issue.category),
                               style: TextStyle(
                                 color: catColor,
                                 fontSize: 10,
@@ -195,7 +198,7 @@ class MyReportCard extends ConsumerWidget {
                           child: ElevatedButton.icon(
                             onPressed: onEdit,
                             icon: const Icon(Icons.edit, size: 14),
-                            label: const Text('Edit'),
+                            label: Text(l.editReport),
                             style: ElevatedButton.styleFrom(
                               padding: const EdgeInsets.symmetric(horizontal: 12),
                               textStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
@@ -208,7 +211,7 @@ class MyReportCard extends ConsumerWidget {
                           child: ElevatedButton.icon(
                             onPressed: onFeedback,
                             icon: const Icon(Icons.star_rate_rounded, size: 14),
-                            label: const Text('Feedback'),
+                            label: Text(l.submitFeedback), // Changed to submitFeedback as "Feedback" was not explicitly in ARB besides button text intent
                             style: ElevatedButton.styleFrom(
                               padding: const EdgeInsets.symmetric(horizontal: 12),
                               textStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),

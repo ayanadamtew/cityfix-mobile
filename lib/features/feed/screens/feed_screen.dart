@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:cityfix_mobile/l10n/app_localizations.dart';
 import '../../../core/constants.dart';
 import '../providers/feed_provider.dart';
 import '../widgets/issue_card.dart';
@@ -32,6 +33,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
   Widget build(BuildContext context) {
     final feedState = ref.watch(feedProvider(_currentFilter));
     final notifications = ref.watch(notificationsProvider);
+    final l = AppLocalizations.of(context)!;
 
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surfaceContainerLowest,
@@ -61,7 +63,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                       fontWeight: FontWeight.w600,
                     ),
                     decoration: InputDecoration(
-                      hintText: 'Search issues...',
+                      hintText: l.feedSearchHint,
                       hintStyle: TextStyle(
                         color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.5),
                       ),
@@ -108,7 +110,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                   });
                 },
               ),
-              _buildNotificationBell(context, ref, notifications),
+              _buildNotificationBell(context, ref, notifications, l),
               const SizedBox(width: 8),
             ],
             bottom: PreferredSize(
@@ -127,11 +129,11 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                   physics: const BouncingScrollPhysics(),
                   child: Row(
                     children: [
-                      _buildSortChip('closest', 'Near', Icons.my_location),
+                      _buildSortChip('closest', l.feedNear, Icons.my_location),
                       const SizedBox(width: 6),
-                      _buildSortChip('recent', 'New', Icons.access_time),
+                      _buildSortChip('recent', l.feedNew, Icons.access_time),
                       const SizedBox(width: 6),
-                      _buildSortChip('urgent', 'Urgent', Icons.local_fire_department),
+                      _buildSortChip('urgent', l.feedUrgent, Icons.local_fire_department),
                       const SizedBox(width: 12),
                       Container(
                         height: 38,
@@ -153,7 +155,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                                 .map((k) => DropdownMenuItem(
                                       value: k,
                                       child: Text(
-                                        k == 'All' ? 'Everywhere' : k,
+                                        k == 'All' ? l.feedEverywhere : k,
                                       ),
                                     ))
                                 .toList(),
@@ -190,14 +192,14 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                         ),
                         const SizedBox(height: 16),
                         Text(
-                          'No issues reported yet.',
+                          l.feedNoIssues,
                           style: Theme.of(context).textTheme.titleMedium?.copyWith(
                                 color: Theme.of(context).colorScheme.outline,
                               ),
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          'Be the first to report a problem!',
+                          l.feedBeFirst,
                           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                                 color: Theme.of(context).colorScheme.outline,
                               ),
@@ -235,7 +237,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                       const Icon(Icons.wifi_off_rounded, size: 64, color: Colors.red),
                       const SizedBox(height: 16),
                       Text(
-                        'Unable to load feed',
+                        l.feedLoadError,
                         style: Theme.of(context).textTheme.titleLarge,
                       ),
                       const SizedBox(height: 8),
@@ -288,13 +290,13 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
   }
 
   Widget _buildNotificationBell(
-      BuildContext context, WidgetRef ref, List<dynamic> notifications) {
+      BuildContext context, WidgetRef ref, List<dynamic> notifications, AppLocalizations l) {
     return Stack(
       alignment: Alignment.center,
       children: [
         IconButton(
           icon: const Icon(Icons.notifications_none_rounded),
-          onPressed: () => _showNotificationsSheet(context, ref),
+          onPressed: () => _showNotificationsSheet(context, ref, l),
         ),
         if (notifications.isNotEmpty)
           Positioned(
@@ -313,7 +315,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
     );
   }
 
-  void _showNotificationsSheet(BuildContext context, WidgetRef ref) {
+  void _showNotificationsSheet(BuildContext context, WidgetRef ref, AppLocalizations l) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -330,6 +332,7 @@ class _NotificationsSheet extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final notifications = ref.watch(notificationsProvider);
     final theme = Theme.of(context);
+    final l = AppLocalizations.of(context)!;
 
     return Material(
       color: Colors.transparent,
@@ -357,7 +360,7 @@ class _NotificationsSheet extends ConsumerWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        'Notifications',
+                        l.notifications,
                         style: theme.textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
@@ -367,7 +370,7 @@ class _NotificationsSheet extends ConsumerWidget {
                           onPressed: () {
                             ref.read(notificationsProvider.notifier).clearHistory();
                           },
-                          child: const Text('Clear All'),
+                          child: Text(l.clearAll),
                         ),
                     ],
                   ),
@@ -385,7 +388,7 @@ class _NotificationsSheet extends ConsumerWidget {
                           ),
                           const SizedBox(height: 16),
                           Text(
-                            'You\'re all caught up!',
+                            l.noNotifications,
                             style: theme.textTheme.titleMedium?.copyWith(
                               color: theme.colorScheme.outline,
                             ),

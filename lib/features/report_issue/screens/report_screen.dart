@@ -7,6 +7,8 @@ import 'package:go_router/go_router.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:geocoding/geocoding.dart' as geo;
+import 'package:cityfix_mobile/l10n/app_localizations.dart';
+import 'package:cityfix_mobile/shared/l10n_extensions.dart';
 import '../providers/report_provider.dart';
 import '../../../shared/custom_text_field.dart';
 import '../../../core/constants.dart';
@@ -51,7 +53,7 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
     }
   }
 
-  Future<void> _getLocation() async {
+  Future<void> _getLocation(AppLocalizations l) async {
     setState(() => _gettingLocation = true);
     try {
       final res = await ref.read(locationServiceProvider).getCurrentLocation();
@@ -65,7 +67,7 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Location error: $e')),
+          SnackBar(content: Text(l.locationError(e.toString()))),
         );
       }
     } finally {
@@ -73,12 +75,12 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
     }
   }
 
-  Future<void> _setManualLocation(LatLng point) async {
+  Future<void> _setManualLocation(LatLng point, AppLocalizations l) async {
     setState(() {
       _lat = point.latitude;
       _lng = point.longitude;
       _hasSetLocation = true;
-      _addressCtrl.text = "Fetching address...";
+      _addressCtrl.text = l.fetchingAddress;
     });
 
     try {
@@ -104,10 +106,10 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
     }
   }
 
-  Future<void> _submit() async {
+  Future<void> _submit(AppLocalizations l) async {
     if (!_hasSetLocation) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please detect your location or tap on the map')),
+        SnackBar(content: Text(l.locationRequired)),
       );
       return;
     }
@@ -126,9 +128,7 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(isOfflineSaved
-                ? 'Saved to Offline Drafts. Will sync automatically.'
-                : 'Issue reported successfully!'),
+            content: Text(isOfflineSaved ? l.reportSaved : l.reportSuccess),
             backgroundColor: isOfflineSaved ? Colors.orange.shade800 : Colors.green.shade800,
           ),
         );
@@ -138,7 +138,7 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to submit: $e')),
+          SnackBar(content: Text(l.failedToSubmit(e.toString()))),
         );
       }
     }
@@ -148,9 +148,10 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
   Widget build(BuildContext context) {
     final isLoading = ref.watch(reportProvider).isLoading;
     final theme = Theme.of(context);
+    final l = AppLocalizations.of(context)!;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Report an Issue')),
+      appBar: AppBar(title: Text(l.reportAnIssue)),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(16),
@@ -163,12 +164,12 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
                 DropdownButtonFormField<String>(
                   initialValue: _category,
                   decoration: InputDecoration(
-                    labelText: 'Category',
+                    labelText: l.category,
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                     filled: true,
                   ),
                   items: AppConstants.categories
-                      .map((c) => DropdownMenuItem(value: c, child: Text(c)))
+                      .map((c) => DropdownMenuItem(value: c, child: Text(l.translateCategory(c))))
                       .toList(),
                   onChanged: (v) => setState(() => _category = v!),
                 ),
@@ -178,7 +179,7 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
                 DropdownButtonFormField<String>(
                   initialValue: _kebele,
                   decoration: InputDecoration(
-                    labelText: 'Kebele (Neighborhood)',
+                    labelText: l.kebele,
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                     filled: true,
                   ),
@@ -191,11 +192,11 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
 
                 // ── Description ──────────────────────────────────────────────
                 CustomTextField(
-                  label: 'Detailed Description',
-                  hint: 'Describe the issue...',
+                  label: l.detailedDescription,
+                  hint: l.descriptionHint,
                   controller: _descCtrl,
                   maxLines: 4,
-                  validator: (v) => v!.isEmpty ? 'Required' : null,
+                  validator: (v) => v!.isEmpty ? l.required : null,
                 ),
                 const SizedBox(height: 16),
 
@@ -219,7 +220,7 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
                             children: [
                               Icon(Icons.camera_alt_outlined, size: 48, color: theme.colorScheme.primary),
                               const SizedBox(height: 8),
-                              const Text('Tap to take a photo'),
+                              Text(l.tapToPhoto),
                             ],
                           ),
                   ),
@@ -231,7 +232,7 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
                   children: [
                     Expanded(
                       child: Text(
-                        'Location',
+                        l.location,
                         style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
                       ),
                     ),
@@ -242,9 +243,9 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
                             child: CircularProgressIndicator(strokeWidth: 2),
                           )
                         : TextButton.icon(
-                            onPressed: _getLocation,
+                            onPressed: () => _getLocation(l),
                             icon: const Icon(Icons.my_location, size: 18),
-                            label: const Text('Detect Current Location'),
+                            label: Text(l.detectLocation),
                           ),
                   ],
                 ),
@@ -258,19 +259,18 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
                       options: MapOptions(
                         initialCenter: LatLng(_lat, _lng),
                         initialZoom: 14.0,
-                        maxZoom: 22.0, // Allow user to zoom deeply
-                        onTap: (_, p) => _setManualLocation(p),
+                        maxZoom: 22.0,
+                        onTap: (_, p) => _setManualLocation(p, l),
                         interactionOptions: const InteractionOptions(
                           flags: InteractiveFlag.all & ~InteractiveFlag.rotate,
                         ),
                       ),
                       children: [
                         TileLayer(
-                          // Esri World Imagery (Free satellite tiles)
                           urlTemplate: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
                           userAgentPackageName: 'com.jimma.cityfix.cityfix_mobile',
                           maxZoom: 22.0,
-                          maxNativeZoom: 19, // Use zoom 19 tiles and stretch them for zoom 20+
+                          maxNativeZoom: 19,
                         ),
                         if (_hasSetLocation)
                           MarkerLayer(
@@ -292,9 +292,9 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
                 Text(
                   _hasSetLocation 
                       ? _addressCtrl.text.isNotEmpty 
-                          ? 'Selected: ${_addressCtrl.text}' 
-                          : 'Location pinpointed'
-                      : 'Tap the map to set a location, or press detect.',
+                          ? l.locationSelected(_addressCtrl.text) 
+                          : l.locationPinpointed
+                      : l.locationInstruction,
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: _hasSetLocation ? theme.colorScheme.primary : theme.colorScheme.outline,
                     fontWeight: _hasSetLocation ? FontWeight.bold : FontWeight.normal,
@@ -306,9 +306,9 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
                 isLoading
                     ? const Center(child: CircularProgressIndicator())
                     : FilledButton.icon(
-                        onPressed: _submit,
+                        onPressed: () => _submit(l),
                         icon: const Icon(Icons.send),
-                        label: const Text('Submit Report'),
+                        label: Text(l.submitReport),
                       ),
               ],
             ),

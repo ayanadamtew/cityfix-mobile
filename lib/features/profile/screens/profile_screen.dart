@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cityfix_mobile/l10n/app_localizations.dart';
 import '../../auth/providers/auth_provider.dart';
 
 import '../../my_reports/providers/my_reports_provider.dart';
@@ -14,10 +15,11 @@ class ProfileScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final firebaseUser = FirebaseAuth.instance.currentUser;
     final myReportsAsync = ref.watch(myReportsProvider);
+    final l = AppLocalizations.of(context)!;
 
     if (firebaseUser == null) {
-      return const Scaffold(
-        body: Center(child: Text('Not logged in.')),
+      return Scaffold(
+        body: Center(child: Text(l.notLoggedIn)),
       );
     }
 
@@ -34,9 +36,16 @@ class ProfileScreen extends ConsumerWidget {
     final settings = ref.watch(settingsProvider);
     final isPushEnabled = settings['pushNotifications'] ?? true;
 
+    // Language options: code -> display name
+    const languageOptions = {
+      'en': 'English',
+      'am': 'አማርኛ',
+      'om': 'Afaan Oromoo',
+    };
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Profile'),
+        title: Text(l.profile),
         centerTitle: true,
         elevation: 0,
         backgroundColor: Colors.transparent,
@@ -132,7 +141,7 @@ class ProfileScreen extends ConsumerWidget {
                       ),
                       const SizedBox(width: 6),
                       Text(
-                        firebaseUser.emailVerified ? 'Verified Citizen' : 'Unverified',
+                        firebaseUser.emailVerified ? l.verifiedCitizen : l.unverified,
                         style: TextStyle(
                           color: Theme.of(context).colorScheme.onPrimary,
                           fontSize: 12,
@@ -150,7 +159,7 @@ class ProfileScreen extends ConsumerWidget {
 
           // 2. User Statistics Row
           Text(
-            'Your Impact',
+            l.yourImpact,
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
@@ -160,7 +169,7 @@ class ProfileScreen extends ConsumerWidget {
             children: [
               Expanded(
                 child: _StatCard(
-                  title: 'Total Reports',
+                  title: l.totalReports,
                   value: myReportsAsync.isLoading ? '...' : totalReports.toString(),
                   icon: Icons.campaign_rounded,
                   color: Theme.of(context).colorScheme.primary,
@@ -169,10 +178,10 @@ class ProfileScreen extends ConsumerWidget {
               const SizedBox(width: 16),
               Expanded(
                 child: _StatCard(
-                  title: 'Resolved',
+                  title: l.resolved,
                   value: myReportsAsync.isLoading ? '...' : resolvedReports.toString(),
                   icon: Icons.check_circle_rounded,
-                  color: Colors.green, // Fixed success color logic for specific stat
+                  color: Colors.green,
                 ),
               ),
             ],
@@ -182,7 +191,7 @@ class ProfileScreen extends ConsumerWidget {
 
           // 3. Settings & Preferences
           Text(
-            'Settings & Preferences',
+            l.settingsTitle,
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
@@ -200,14 +209,14 @@ class ProfileScreen extends ConsumerWidget {
               children: [
                 _SettingsTile(
                   icon: Icons.notifications_active_rounded,
-                  title: 'Push Notifications',
+                  title: l.pushNotifications,
                   trailing: Switch(
                     value: isPushEnabled,
                     onChanged: (val) {
                       ref.read(settingsProvider.notifier).togglePushNotifications(val);
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
-                          content: Text(val ? 'Push Notifications Enabled.' : 'Push Notifications Disabled.'),
+                          content: Text(val ? l.pushEnabled : l.pushDisabled),
                           behavior: SnackBarBehavior.floating,
                         ),
                       );
@@ -217,7 +226,7 @@ class ProfileScreen extends ConsumerWidget {
                 Divider(height: 1, color: Theme.of(context).colorScheme.outlineVariant.withOpacity(0.5)),
                 _SettingsTile(
                   icon: Icons.dark_mode_rounded,
-                  title: 'App Theme',
+                  title: l.appTheme,
                   trailing: DropdownButtonHideUnderline(
                     child: DropdownButton<String>(
                       value: ref.watch(settingsProvider)['themeMode'],
@@ -226,10 +235,10 @@ class ProfileScreen extends ConsumerWidget {
                             fontWeight: FontWeight.w600,
                             color: Theme.of(context).colorScheme.primary,
                           ),
-                      items: const [
-                        DropdownMenuItem(value: 'system', child: Text('System Defaults')),
-                        DropdownMenuItem(value: 'light', child: Text('Light Mode')),
-                        DropdownMenuItem(value: 'dark', child: Text('Dark Mode')),
+                      items: [
+                        DropdownMenuItem(value: 'system', child: Text(l.systemDefault)),
+                        DropdownMenuItem(value: 'light', child: Text(l.lightMode)),
+                        DropdownMenuItem(value: 'dark', child: Text(l.darkMode)),
                       ],
                       onChanged: (String? mode) {
                         if (mode != null) {
@@ -240,9 +249,36 @@ class ProfileScreen extends ConsumerWidget {
                   ),
                 ),
                 Divider(height: 1, color: Theme.of(context).colorScheme.outlineVariant.withOpacity(0.5)),
+                // ── Language Selector ──
+                _SettingsTile(
+                  icon: Icons.translate_rounded,
+                  title: l.language,
+                  trailing: DropdownButtonHideUnderline(
+                    child: DropdownButton<String>(
+                      value: settings['locale'] as String? ?? 'en',
+                      icon: const Icon(Icons.arrow_drop_down_rounded),
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                      items: languageOptions.entries
+                          .map((e) => DropdownMenuItem(
+                                value: e.key,
+                                child: Text(e.value),
+                              ))
+                          .toList(),
+                      onChanged: (String? code) {
+                        if (code != null) {
+                          ref.read(settingsProvider.notifier).updateLocale(code);
+                        }
+                      },
+                    ),
+                  ),
+                ),
+                Divider(height: 1, color: Theme.of(context).colorScheme.outlineVariant.withOpacity(0.5)),
                 _SettingsTile(
                   icon: Icons.privacy_tip_rounded,
-                  title: 'Privacy Policy',
+                  title: l.privacyPolicy,
                   onTap: () {
                     showModalBottomSheet(
                       context: context,
@@ -255,7 +291,7 @@ class ProfileScreen extends ConsumerWidget {
                         minChildSize: 0.4,
                         maxChildSize: 0.9,
                         expand: false,
-                        builder: (_, controller) => _buildPolicySheet(context, controller),
+                        builder: (_, controller) => _buildPolicySheet(context, controller, l),
                       ),
                     );
                   },
@@ -263,19 +299,17 @@ class ProfileScreen extends ConsumerWidget {
                 Divider(height: 1, color: Theme.of(context).colorScheme.outlineVariant.withOpacity(0.5)),
                 _SettingsTile(
                   icon: Icons.help_outline_rounded,
-                  title: 'Help & Support',
+                  title: l.helpSupport,
                   onTap: () {
                     showDialog(
                       context: context,
                       builder: (context) => AlertDialog(
-                        title: const Text('Help & Support'),
-                        content: const Text(
-                          'If you need assistance using the CityFix app, please contact the Jimma City municipal office at support@cityfix.com or call 911 for emergencies.',
-                        ),
+                        title: Text(l.helpSupport),
+                        content: Text(l.helpContent),
                         actions: [
                           TextButton(
                             onPressed: () => Navigator.pop(context),
-                            child: const Text('Close'),
+                            child: Text(l.close),
                           ),
                         ],
                       ),
@@ -297,7 +331,7 @@ class ProfileScreen extends ConsumerWidget {
               }
             },
             icon: const Icon(Icons.logout_rounded),
-            label: const Text('Sign Out'),
+            label: Text(l.signOut),
             style: OutlinedButton.styleFrom(
               foregroundColor: Theme.of(context).colorScheme.error,
               side: BorderSide(color: Theme.of(context).colorScheme.error.withOpacity(0.5)),
@@ -312,7 +346,7 @@ class ProfileScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildPolicySheet(BuildContext context, ScrollController controller) {
+  Widget _buildPolicySheet(BuildContext context, ScrollController controller, AppLocalizations l) {
     return Padding(
       padding: const EdgeInsets.all(24.0),
       child: Column(
@@ -330,7 +364,7 @@ class ProfileScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 24),
           Text(
-            'Privacy Policy',
+            l.privacyPolicy,
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 16),
@@ -339,15 +373,15 @@ class ProfileScreen extends ConsumerWidget {
               controller: controller,
               children: [
                 Text(
-                  'Your privacy is important to us. This policy explains how we handle your data.',
+                  l.privacyIntro,
                   style: Theme.of(context).textTheme.bodyLarge,
                 ),
                 const SizedBox(height: 16),
-                const Text('1. Data Collection\nWe collect location and photo data strictly for public civic issue reporting, minimizing personal telemetry.'),
+                Text(l.privacyDataCollection),
                 const SizedBox(height: 12),
-                const Text('2. Data Security\nWe encrypt your data aligning with standard municipality guidelines.'),
+                Text(l.privacyDataSecurity),
                 const SizedBox(height: 12),
-                const Text('3. Push notifications\nWe use Firebase Cloud Messaging securely to update you on issue resolutions locally.'),
+                Text(l.privacyNotifications),
                 const SizedBox(height: 32),
               ],
             ),

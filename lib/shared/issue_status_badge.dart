@@ -1,5 +1,7 @@
 // lib/shared/issue_status_badge.dart
 import 'package:flutter/material.dart';
+import 'package:cityfix_mobile/l10n/app_localizations.dart';
+import 'package:cityfix_mobile/shared/l10n_extensions.dart';
 import '../core/constants.dart';
 
 class IssueStatusBadge extends StatelessWidget {
@@ -11,28 +13,25 @@ class IssueStatusBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     Color bg;
     Color fg;
-    String label;
+    final l = AppLocalizations.of(context)!;
 
     switch (status.toLowerCase()) {
       case AppConstants.statusPending:
         bg = Colors.red.shade100;
         fg = Colors.red.shade800;
-        label = 'Pending';
         break;
       case AppConstants.statusInProgress:
+      case 'in progress':
         bg = Colors.orange.shade100;
         fg = Colors.orange.shade900;
-        label = 'In Progress';
         break;
       case AppConstants.statusResolved:
         bg = Colors.green.shade100;
         fg = Colors.green.shade800;
-        label = 'Resolved';
         break;
       default:
         bg = Colors.grey.shade100;
         fg = Colors.grey.shade700;
-        label = status;
     }
 
     return Container(
@@ -42,7 +41,7 @@ class IssueStatusBadge extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
       ),
       child: Text(
-        label,
+        l.translateStatus(status),
         style: TextStyle(
           color: fg,
           fontSize: 12,

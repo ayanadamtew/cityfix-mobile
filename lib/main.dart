@@ -3,12 +3,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:cityfix_mobile/l10n/app_localizations.dart';
 
 import 'firebase_options.dart';
 import 'core/theme.dart';
 import 'core/router.dart';
 import 'core/constants.dart';
 import 'core/push_notification_service.dart';
+import 'core/localization_fallback.dart';
 import 'services/offline_sync_service.dart';
 import 'features/profile/providers/settings_provider.dart';
 
@@ -80,12 +83,30 @@ class _CityFixAppState extends ConsumerState<CityFixApp> {
         themeMode = ThemeMode.system;
     }
 
+    final localeCode = settings['locale'] as String? ?? 'en';
+    final locale = Locale(localeCode);
+
     return MaterialApp.router(
       title: 'CityFix Jimma',
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
       themeMode: themeMode,
       routerConfig: router,
+      locale: locale,
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+        FallbackMaterialLocalizationDelegate(),
+        FallbackCupertinoLocalizationDelegate(),
+        FallbackWidgetsLocalizationDelegate(),
+      ],
+      supportedLocales: const [
+        Locale('en'),
+        Locale('am'),
+        Locale('om'),
+      ],
     );
   }
 }

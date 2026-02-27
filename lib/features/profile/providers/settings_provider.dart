@@ -10,6 +10,7 @@ class SettingsNotifier extends Notifier<Map<String, dynamic>> {
     return {
       'pushNotifications': box.get('pushNotifications', defaultValue: true),
       'themeMode': box.get('themeMode', defaultValue: 'system'),
+      'locale': box.get('locale', defaultValue: 'en'),
     };
   }
 
@@ -23,6 +24,12 @@ class SettingsNotifier extends Notifier<Map<String, dynamic>> {
     final box = Hive.box(AppConstants.userBox);
     box.put('themeMode', mode);
     state = {...state, 'themeMode': mode};
+  }
+
+  void updateLocale(String localeCode) {
+    final box = Hive.box(AppConstants.userBox);
+    box.put('locale', localeCode);
+    state = {...state, 'locale': localeCode};
   }
 }
 

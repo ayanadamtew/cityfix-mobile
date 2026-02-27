@@ -5,6 +5,8 @@ import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:geocoding/geocoding.dart' as geo;
+import 'package:cityfix_mobile/l10n/app_localizations.dart';
+import 'package:cityfix_mobile/shared/l10n_extensions.dart';
 
 import '../../feed/providers/feed_provider.dart';
 import '../providers/my_reports_provider.dart';
@@ -15,6 +17,7 @@ class MyReportsScreen extends ConsumerWidget {
   const MyReportsScreen({super.key});
 
   void _showFeedbackModal(BuildContext context, WidgetRef ref, String issueId) {
+    final l = AppLocalizations.of(context)!;
     double selectedRating = 5.0;
     final commentCtrl = TextEditingController();
 
@@ -31,7 +34,7 @@ class MyReportsScreen extends ConsumerWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text('Rate the Resolution',
+            Text(l.rateResolution,
                 style: Theme.of(ctx).textTheme.titleLarge),
             const SizedBox(height: 16),
             RatingBar.builder(
@@ -50,9 +53,9 @@ class MyReportsScreen extends ConsumerWidget {
             const SizedBox(height: 16),
             TextField(
               controller: commentCtrl,
-              decoration: const InputDecoration(
-                hintText: 'Optional comment...',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                hintText: l.optionalComment,
+                border: const OutlineInputBorder(),
               ),
               maxLines: 3,
             ),
@@ -68,18 +71,18 @@ class MyReportsScreen extends ConsumerWidget {
                     if (ctx.mounted) {
                       Navigator.pop(ctx);
                       ScaffoldMessenger.of(ctx).showSnackBar(
-                        const SnackBar(content: Text('Feedback Submitted!')),
+                        SnackBar(content: Text(l.feedbackSubmitted)),
                       );
                     }
                   } catch (e) {
                     if (ctx.mounted) {
                       ScaffoldMessenger.of(ctx).showSnackBar(
-                        SnackBar(content: Text('Failed: $e')),
+                        SnackBar(content: Text(l.failedGeneric(e.toString()))),
                       );
                     }
                   }
                 },
-                child: const Text('Submit Feedback'),
+                child: Text(l.submitFeedback),
               ),
             ),
             const SizedBox(height: 24),
@@ -93,7 +96,7 @@ class MyReportsScreen extends ConsumerWidget {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.transparent, // Allow full screen height if needed
+      backgroundColor: Colors.transparent,
       builder: (ctx) => _EditReportForm(issue: issue, ref: ref),
     );
   }
@@ -101,13 +104,14 @@ class MyReportsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(myReportsProvider);
+    final l = AppLocalizations.of(context)!;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('My Reports')),
+      appBar: AppBar(title: Text(l.myReports)),
       body: state.when(
         data: (issues) {
           if (issues.isEmpty) {
-            return const Center(child: Text("You haven't reported anything yet."));
+            return Center(child: Text(l.noReportsYet));
           }
           return RefreshIndicator(
             onRefresh: () => ref.read(myReportsProvider.notifier).refresh(),
@@ -170,7 +174,6 @@ class _EditReportFormState extends State<_EditReportForm> {
         ? rawKebele
         : AppConstants.jimmaKebeles.first;
 
-    // Use existing coords or fallback to Jimma center
     _lat = widget.issue.latitude() ?? 7.6750;
     _lng = widget.issue.longitude() ?? 36.8370;
     _address = widget.issue.rawLocation?['address']?.toString() ?? 'Coordinate chosen';
@@ -184,10 +187,11 @@ class _EditReportFormState extends State<_EditReportForm> {
   }
 
   Future<void> _handleMapTap(TapPosition tapPosition, LatLng point) async {
+    final l = AppLocalizations.of(context)!;
     setState(() {
       _lat = point.latitude;
       _lng = point.longitude;
-      _address = "Fetching address...";
+      _address = l.fetchingAddress;
     });
 
     try {
@@ -214,10 +218,10 @@ class _EditReportFormState extends State<_EditReportForm> {
 
   Future<void> _saveChanges() async {
     if (_descCtrl.text.trim().isEmpty) return;
+    final l = AppLocalizations.of(context)!;
 
     setState(() => _isSaving = true);
     try {
-      // Reconstruct a new "Issue" object in memory just so the update payload builder has the modified coordinates
       final patchedIssue = Issue(
         id: widget.issue.id,
         title: widget.issue.title,
@@ -245,13 +249,13 @@ class _EditReportFormState extends State<_EditReportForm> {
       if (mounted) {
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Report Updated Successfully')),
+          SnackBar(content: Text(l.reportUpdated)),
         );
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Update failed: $e')),
+          SnackBar(content: Text(l.updateFailed(e.toString()))),
         );
       }
     } finally {
@@ -262,7 +266,8 @@ class _EditReportFormState extends State<_EditReportForm> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    // Modal styling: white background with rounded top corners
+    final l = AppLocalizations.of(context)!;
+
     return Container(
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
@@ -291,7 +296,7 @@ class _EditReportFormState extends State<_EditReportForm> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
             child: Text(
-              'Edit Report', 
+              l.editReport,
               style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
             ),
           ),
@@ -304,12 +309,12 @@ class _EditReportFormState extends State<_EditReportForm> {
                 children: [
                   DropdownButtonFormField<String>(
                     initialValue: _selectedCategory,
-                    decoration: const InputDecoration(
-                      labelText: 'Category',
-                      border: OutlineInputBorder(),
+                    decoration: InputDecoration(
+                      labelText: l.category,
+                      border: const OutlineInputBorder(),
                     ),
                     items: AppConstants.categories
-                        .map((c) => DropdownMenuItem(value: c, child: Text(c)))
+                        .map((c) => DropdownMenuItem(value: c, child: Text(l.translateCategory(c))))
                         .toList(),
                     onChanged: (v) => setState(() => _selectedCategory = v!),
                   ),
@@ -317,9 +322,9 @@ class _EditReportFormState extends State<_EditReportForm> {
 
                   DropdownButtonFormField<String>(
                     initialValue: _selectedKebele,
-                    decoration: const InputDecoration(
-                      labelText: 'Kebele (Neighborhood)',
-                      border: OutlineInputBorder(),
+                    decoration: InputDecoration(
+                      labelText: l.kebele,
+                      border: const OutlineInputBorder(),
                     ),
                     items: AppConstants.jimmaKebeles
                         .map((k) => DropdownMenuItem(value: k, child: Text(k)))
@@ -330,10 +335,10 @@ class _EditReportFormState extends State<_EditReportForm> {
 
                   TextField(
                     controller: _descCtrl,
-                    decoration: const InputDecoration(
-                      labelText: 'Description',
+                    decoration: InputDecoration(
+                      labelText: l.description,
                       alignLabelWithHint: true,
-                      border: OutlineInputBorder(),
+                      border: const OutlineInputBorder(),
                     ),
                     maxLines: 4,
                   ),
@@ -341,7 +346,7 @@ class _EditReportFormState extends State<_EditReportForm> {
 
                   // Location Map
                   Text(
-                    'Update Map Location',
+                    l.updateMapLocation,
                     style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 8),
@@ -362,11 +367,10 @@ class _EditReportFormState extends State<_EditReportForm> {
                         ),
                         children: [
                           TileLayer(
-                            // Esri World Imagery (Free satellite tiles)
                             urlTemplate: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
                             userAgentPackageName: 'com.jimma.cityfix.cityfix_mobile',
                             maxZoom: 22.0,
-                            maxNativeZoom: 19, // Use zoom 19 tiles and stretch them for zoom 20+
+                            maxNativeZoom: 19,
                           ),
                           MarkerLayer(
                             markers: [
@@ -395,7 +399,7 @@ class _EditReportFormState extends State<_EditReportForm> {
                     onPressed: _isSaving ? null : _saveChanges,
                     child: _isSaving 
                       ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                      : const Text('Save Changes'),
+                      : Text(l.saveChanges),
                   ),
                 ],
               ),
