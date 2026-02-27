@@ -29,6 +29,18 @@ class FeedFilter {
 
   @override
   int get hashCode => sort.hashCode ^ kebele.hashCode ^ search.hashCode;
+
+  FeedFilter copyWith({
+    String? sort,
+    String? kebele,
+    String? search,
+  }) {
+    return FeedFilter(
+      sort: sort ?? this.sort,
+      kebele: kebele ?? this.kebele,
+      search: search ?? this.search,
+    );
+  }
 }
 
 // ---------------------------------------------------------------------------

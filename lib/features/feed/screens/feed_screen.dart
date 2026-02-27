@@ -18,6 +18,7 @@ class FeedScreen extends ConsumerStatefulWidget {
 class _FeedScreenState extends ConsumerState<FeedScreen> {
   FeedFilter _currentFilter = const FeedFilter();
   Timer? _debounce;
+  bool _isSearching = false;
   final TextEditingController _searchController = TextEditingController();
 
   @override
@@ -50,31 +51,68 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                 child: Container(color: Colors.transparent),
               ),
             ),
-            title: Row(
-              children: [
-                Icon(Icons.location_city, size: 28, color: Theme.of(context).colorScheme.primary),
-                const SizedBox(width: 8),
-                Text(
-                  'CityFix',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: -0.5,
-                    fontSize: 24,
-                    color: Theme.of(context).colorScheme.primary,
+            title: _isSearching
+                ? TextField(
+                    controller: _searchController,
+                    autofocus: true,
+                    style: TextStyle(
+                      fontSize: 18,
+                      color: Theme.of(context).colorScheme.primary,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    decoration: InputDecoration(
+                      hintText: 'Search issues...',
+                      hintStyle: TextStyle(
+                        color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.5),
+                      ),
+                      border: InputBorder.none,
+                      enabledBorder: InputBorder.none,
+                      focusedBorder: InputBorder.none,
+                      filled: false,
+                      contentPadding: EdgeInsets.zero,
+                    ),
+                    onChanged: (value) {
+                      if (_debounce?.isActive ?? false) _debounce!.cancel();
+                      _debounce = Timer(const Duration(milliseconds: 500), () {
+                        setState(() {
+                          _currentFilter = _currentFilter.copyWith(search: value);
+                        });
+                      });
+                    },
+                  )
+                : Row(
+                    children: [
+                      Icon(Icons.location_city, size: 28, color: Theme.of(context).colorScheme.primary),
+                      const SizedBox(width: 8),
+                      Text(
+                        'CityFix',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: -0.5,
+                          fontSize: 24,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-              ],
-            ),
             actions: [
-              _buildNotificationBell(context, ref, notifications),
               IconButton(
-                icon: const Icon(Icons.person_outline_rounded),
-                onPressed: () => context.go('/profile'),
+                icon: Icon(_isSearching ? Icons.close_rounded : Icons.search_rounded),
+                onPressed: () {
+                  setState(() {
+                    _isSearching = !_isSearching;
+                    if (!_isSearching) {
+                      _searchController.clear();
+                      _currentFilter = _currentFilter.copyWith(search: '');
+                    }
+                  });
+                },
               ),
+              _buildNotificationBell(context, ref, notifications),
               const SizedBox(width: 8),
             ],
             bottom: PreferredSize(
-              preferredSize: const Size.fromHeight(130),
+              preferredSize: const Size.fromHeight(70),
               child: Container(
                 padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
                 decoration: BoxDecoration(
@@ -84,127 +122,53 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                     ),
                   ),
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    // Search Bar
-                    TextField(
-                      controller: _searchController,
-                      onChanged: (value) {
-                        if (_debounce?.isActive ?? false) _debounce!.cancel();
-                        _debounce = Timer(const Duration(milliseconds: 500), () {
-                          setState(() {
-                            _currentFilter = FeedFilter(
-                              sort: _currentFilter.sort,
-                              kebele: _currentFilter.kebele,
-                              search: value,
-                            );
-                          });
-                        });
-                      },
-                      textInputAction: TextInputAction.search,
-                      decoration: InputDecoration(
-                        hintText: 'Search categories, areas, or descriptions...',
-                        prefixIcon: const Icon(Icons.search_rounded),
-                        suffixIcon: _currentFilter.search.isNotEmpty
-                            ? IconButton(
-                                icon: const Icon(Icons.clear_rounded, size: 18),
-                                onPressed: () {
-                                  _searchController.clear();
-                                  setState(() {
-                                    _currentFilter = FeedFilter(
-                                      sort: _currentFilter.sort,
-                                      kebele: _currentFilter.kebele,
-                                      search: '',
-                                    );
-                                  });
-                                },
-                              )
-                            : null,
-                        filled: true,
-                        fillColor: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
-                        contentPadding: const EdgeInsets.symmetric(vertical: 0),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(30),
-                          borderSide: BorderSide.none,
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  physics: const BouncingScrollPhysics(),
+                  child: Row(
+                    children: [
+                      _buildSortChip('closest', 'Near', Icons.my_location),
+                      const SizedBox(width: 6),
+                      _buildSortChip('recent', 'New', Icons.access_time),
+                      const SizedBox(width: 6),
+                      _buildSortChip('urgent', 'Urgent', Icons.local_fire_department),
+                      const SizedBox(width: 12),
+                      Container(
+                        height: 38,
+                        padding: const EdgeInsets.symmetric(horizontal: 14),
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.5),
+                          ),
+                          borderRadius: BorderRadius.circular(20),
                         ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(30),
-                          borderSide: BorderSide(
-                            color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.5),
-                            width: 1,
+                        child: DropdownButtonHideUnderline(
+                          child: DropdownButton<String>(
+                            value: _currentFilter.kebele,
+                            icon: const Icon(Icons.arrow_drop_down_rounded, size: 24),
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              fontWeight: FontWeight.w600,
+                            ),
+                            items: ['All', ...AppConstants.jimmaKebeles]
+                                .map((k) => DropdownMenuItem(
+                                      value: k,
+                                      child: Text(
+                                        k == 'All' ? 'Everywhere' : k,
+                                      ),
+                                    ))
+                                .toList(),
+                            onChanged: (v) {
+                              if (v != null) {
+                                setState(() {
+                                  _currentFilter = _currentFilter.copyWith(kebele: v);
+                                });
+                              }
+                            },
                           ),
                         ),
                       ),
-                    ),
-                    const SizedBox(height: 12),
-                    
-                    // Filters Row
-                    Row(
-                      children: [
-                        Expanded(
-                          flex: 6,
-                          child: SingleChildScrollView(
-                            scrollDirection: Axis.horizontal,
-                            physics: const BouncingScrollPhysics(),
-                            child: Row(
-                              children: [
-                                _buildSortChip('closest', 'Near', Icons.my_location),
-                                const SizedBox(width: 6),
-                                _buildSortChip('recent', 'New', Icons.access_time),
-                                const SizedBox(width: 6),
-                                _buildSortChip('urgent', 'Urgent', Icons.local_fire_department),
-                              ],
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          flex: 4,
-                          child: Container(
-                            height: 38,
-                            padding: const EdgeInsets.symmetric(horizontal: 14),
-                            decoration: BoxDecoration(
-                              border: Border.all(
-                                color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.5),
-                              ),
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: DropdownButtonHideUnderline(
-                              child: DropdownButton<String>(
-                                value: _currentFilter.kebele,
-                                isExpanded: true,
-                                icon: const Icon(Icons.arrow_drop_down_rounded, size: 24),
-                                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  fontWeight: FontWeight.w600,
-                                ),
-                                items: ['All', ...AppConstants.jimmaKebeles]
-                                    .map((k) => DropdownMenuItem(
-                                          value: k,
-                                          child: Text(
-                                            k == 'All' ? 'Everywhere' : k,
-                                            overflow: TextOverflow.ellipsis,
-                                          ),
-                                        ))
-                                    .toList(),
-                                onChanged: (v) {
-                                  if (v != null) {
-                                    setState(() {
-                                      _currentFilter = FeedFilter(
-                                        sort: _currentFilter.sort,
-                                        search: _currentFilter.search,
-                                        kebele: v,
-                                      );
-                                    });
-                                  }
-                                },
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),

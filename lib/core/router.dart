@@ -78,6 +78,7 @@ class _AppShellState extends State<_AppShell> {
                   backgroundColor: theme.colorScheme.primary,
                   foregroundColor: Colors.white,
                   elevation: 6,
+                  shape: const CircleBorder(),
                   child: const Icon(Icons.add_rounded, size: 28),
                 ),
               ),
