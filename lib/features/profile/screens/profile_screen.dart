@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cityfix_mobile/l10n/app_localizations.dart';
 import '../../auth/providers/auth_provider.dart';
+import '../../../shared/custom_toast.dart';
 
 import '../../my_reports/providers/my_reports_provider.dart';
 import '../providers/settings_provider.dart';
@@ -214,12 +215,7 @@ class ProfileScreen extends ConsumerWidget {
                     value: isPushEnabled,
                     onChanged: (val) {
                       ref.read(settingsProvider.notifier).togglePushNotifications(val);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(val ? l.pushEnabled : l.pushDisabled),
-                          behavior: SnackBarBehavior.floating,
-                        ),
-                      );
+                      ToastService.showInfo(context, val ? l.pushEnabled : l.pushDisabled);
                     },
                   ),
                 ),

@@ -12,6 +12,7 @@ import '../../feed/providers/feed_provider.dart';
 import '../providers/my_reports_provider.dart';
 import '../widgets/my_report_card.dart';
 import '../../../core/constants.dart';
+import '../../../shared/custom_toast.dart';
 
 class MyReportsScreen extends ConsumerWidget {
   const MyReportsScreen({super.key});
@@ -70,15 +71,11 @@ class MyReportsScreen extends ConsumerWidget {
                         .submitFeedback(issueId, selectedRating, commentCtrl.text);
                     if (ctx.mounted) {
                       Navigator.pop(ctx);
-                      ScaffoldMessenger.of(ctx).showSnackBar(
-                        SnackBar(content: Text(l.feedbackSubmitted)),
-                      );
+                      ToastService.showSuccess(ctx, l.feedbackSubmitted);
                     }
                   } catch (e) {
                     if (ctx.mounted) {
-                      ScaffoldMessenger.of(ctx).showSnackBar(
-                        SnackBar(content: Text(l.failedGeneric(e.toString()))),
-                      );
+                      ToastService.showError(ctx, l.failedGeneric(e.toString()));
                     }
                   }
                 },
@@ -248,15 +245,11 @@ class _EditReportFormState extends State<_EditReportForm> {
           );
       if (mounted) {
         Navigator.pop(context);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l.reportUpdated)),
-        );
+        ToastService.showSuccess(context, l.reportUpdated);
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l.updateFailed(e.toString()))),
-        );
+        ToastService.showError(context, l.updateFailed(e.toString()));
       }
     } finally {
       if (mounted) setState(() => _isSaving = false);

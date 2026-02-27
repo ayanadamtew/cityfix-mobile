@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:cityfix_mobile/l10n/app_localizations.dart';
 import '../providers/auth_provider.dart';
 import '../../../shared/custom_text_field.dart';
+import '../../../shared/custom_toast.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {
   const RegisterScreen({super.key});
@@ -40,12 +41,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     if (!mounted) return;
     final authState = ref.read(authNotifierProvider);
     if (authState.hasError) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(authState.error.toString()),
-          backgroundColor: Theme.of(context).colorScheme.error,
-        ),
-      );
+      ToastService.showError(context, authState.error.toString());
     }
   }
 

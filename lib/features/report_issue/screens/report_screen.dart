@@ -13,6 +13,7 @@ import '../providers/report_provider.dart';
 import '../../../shared/custom_text_field.dart';
 import '../../../core/constants.dart';
 import '../../../services/location_service.dart';
+import '../../../shared/custom_toast.dart';
 
 class ReportScreen extends ConsumerStatefulWidget {
   const ReportScreen({super.key});
@@ -66,9 +67,7 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
       _mapController.move(LatLng(_lat, _lng), 15.0);
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l.locationError(e.toString()))),
-        );
+        ToastService.showError(context, l.locationError(e.toString()));
       }
     } finally {
       if (mounted) setState(() => _gettingLocation = false);
@@ -108,9 +107,7 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
 
   Future<void> _submit(AppLocalizations l) async {
     if (!_hasSetLocation) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l.locationRequired)),
-      );
+      ToastService.showError(context, l.locationRequired);
       return;
     }
 
@@ -126,20 +123,18 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
           );
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(isOfflineSaved ? l.reportSaved : l.reportSuccess),
-            backgroundColor: isOfflineSaved ? Colors.orange.shade800 : Colors.green.shade800,
-          ),
-        );
+        final message = isOfflineSaved ? l.reportSaved : l.reportSuccess;
+        if (isOfflineSaved) {
+          ToastService.showInfo(context, message);
+        } else {
+          ToastService.showSuccess(context, message);
+        }
         // Reset form and go to feed
         context.go('/feed');
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l.failedToSubmit(e.toString()))),
-        );
+        ToastService.showError(context, l.failedToSubmit(e.toString()));
       }
     }
   }

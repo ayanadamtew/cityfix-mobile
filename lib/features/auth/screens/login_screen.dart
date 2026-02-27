@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:cityfix_mobile/l10n/app_localizations.dart';
 import '../providers/auth_provider.dart';
 import '../../../shared/custom_text_field.dart';
+import '../../../shared/custom_toast.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -33,12 +34,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         .login(_emailCtrl.text.trim(), _passCtrl.text);
     final authState = ref.read(authNotifierProvider);
     if (mounted && authState.hasError) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(authState.error.toString()),
-          backgroundColor: Theme.of(context).colorScheme.error,
-        ),
-      );
+      ToastService.showError(context, authState.error.toString());
     }
   }
 

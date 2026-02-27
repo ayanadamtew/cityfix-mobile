@@ -10,6 +10,7 @@ import 'package:cityfix_mobile/shared/l10n_extensions.dart';
 import '../providers/feed_provider.dart';
 import '../../../core/api_client.dart';
 import '../../../shared/issue_status_badge.dart';
+import '../../../shared/custom_toast.dart';
 
 class ReportDetailScreen extends ConsumerStatefulWidget {
   const ReportDetailScreen({super.key, required this.issueId});
@@ -46,9 +47,7 @@ class _ReportDetailScreenState extends ConsumerState<ReportDetailScreen> {
       // Though socket should handle it, invalidating ensures consistency
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to post comment: $e')),
-        );
+        ToastService.showError(context, 'Failed to post comment: $e');
       }
     } finally {
       if (mounted) setState(() => _isPosting = false);

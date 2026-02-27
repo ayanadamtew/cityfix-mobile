@@ -10,6 +10,7 @@ import 'package:cityfix_mobile/shared/l10n_extensions.dart';
 import '../providers/feed_provider.dart';
 import '../../../shared/issue_status_badge.dart';
 import '../../auth/providers/auth_provider.dart';
+import '../../../shared/custom_toast.dart';
 
 class IssueCard extends ConsumerWidget {
   const IssueCard({super.key, required this.issue});
@@ -214,15 +215,15 @@ class IssueCard extends ConsumerWidget {
                                       try {
                                         await ref.read(feedProvider(const FeedFilter()).notifier).reportIssue(issue.id, reason);
                                         if (context.mounted) {
-                                          ScaffoldMessenger.of(context).showSnackBar(
-                                            SnackBar(content: Text(l.reportedForReview)),
-                                          );
+                                          if (context.mounted) {
+                                            ToastService.showSuccess(context, l.reportedForReview);
+                                          }
                                         }
                                       } catch (e) {
                                         if (context.mounted) {
-                                          ScaffoldMessenger.of(context).showSnackBar(
-                                            SnackBar(content: Text(l.failedToReport)),
-                                          );
+                                          if (context.mounted) {
+                                            ToastService.showError(context, l.failedToReport);
+                                          }
                                         }
                                       }
                                     }
