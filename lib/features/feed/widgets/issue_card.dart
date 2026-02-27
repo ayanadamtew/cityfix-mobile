@@ -56,277 +56,306 @@ class IssueCard extends ConsumerWidget {
         ? currentBackendId
         : (firebaseUser?.uid ?? '');
 
-    return Card(
-      elevation: 2,
-      shadowColor: Colors.black12,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: theme.colorScheme.outlineVariant.withValues(alpha: 0.2),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.02),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
       child: InkWell(
         borderRadius: BorderRadius.circular(16),
         onTap: () => context.go('/feed/comments/${issue.id}'),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // ── Photo ────────────────────────────────────────────────────
-            if (issue.photoUrl.isNotEmpty)
-              ClipRRect(
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-                child: CachedNetworkImage(
-                  imageUrl: issue.photoUrl,
-                  height: 180,
-                  fit: BoxFit.cover,
-                  placeholder: (_, __) => Container(
-                    height: 180,
-                    color: theme.colorScheme.surfaceContainerHighest,
-                    child: const Center(child: CircularProgressIndicator(strokeWidth: 2)),
+            // ── Header (Author, Date, Category) ─────────────────────────
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  // Reporter Avatar
+                  CircleAvatar(
+                    radius: 18,
+                    backgroundColor: catColor.withValues(alpha: 0.15),
+                    child: Text(
+                      (issue.authorName?.isNotEmpty == true
+                              ? issue.authorName![0]
+                              : '?')
+                          .toUpperCase(),
+                      style: TextStyle(
+                        color: catColor,
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
-                  errorWidget: (_, __, ___) => Container(
-                    height: 120,
-                    color: theme.colorScheme.surfaceContainerHighest,
-                    child: Icon(Icons.image_not_supported_outlined,
-                        color: theme.colorScheme.outline, size: 40),
+                  const SizedBox(width: 10),
+                  // Reporter Name & Time
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          issue.authorName ?? 'Anonymous Citizen',
+                          style: theme.textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.w700,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        Text(
+                          DateFormat('MMM d, y • h:mm a').format(issue.createdAt.toLocal()),
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: theme.colorScheme.outline,
+                            fontSize: 11,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  // Category Pill
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: catColor.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(catIcon, size: 12, color: catColor),
+                        const SizedBox(width: 4),
+                        Text(
+                          issue.category,
+                          style: TextStyle(
+                            color: catColor,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 0.2,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  // Action Menu
+                  if (isLoggedIn && (currentBackendId.isEmpty || currentBackendId != issue.authorId))
+                    SizedBox(
+                      width: 24,
+                      child: PopupMenuButton<String>(
+                        icon: Icon(Icons.more_horiz_rounded, size: 20, color: theme.colorScheme.onSurfaceVariant),
+                        padding: EdgeInsets.zero,
+                        itemBuilder: (context) => [
+                          PopupMenuItem(
+                            value: 'report',
+                            child: Row(
+                              children: [
+                                Icon(Icons.flag_outlined, size: 20, color: theme.colorScheme.error),
+                                const SizedBox(width: 8),
+                                Text('Report Issue', style: TextStyle(color: theme.colorScheme.error)),
+                              ],
+                            ),
+                          ),
+                        ],
+                        onSelected: (value) async {
+                          if (value == 'report') {
+                            String? currentReason;
+                            final reason = await showDialog<String>(
+                              context: context,
+                              builder: (ctx) {
+                                return AlertDialog(
+                                  title: const Text('Report Issue'),
+                                  content: TextField(
+                                    decoration: const InputDecoration(
+                                      labelText: 'Reason',
+                                      hintText: 'Why is this issue unnecessary or inappropriate?',
+                                    ),
+                                    maxLines: 3,
+                                    onChanged: (val) => currentReason = val,
+                                  ),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () => Navigator.pop(ctx),
+                                      child: const Text('Cancel'),
+                                    ),
+                                    FilledButton(
+                                      onPressed: () => Navigator.pop(ctx, currentReason),
+                                      child: const Text('Submit'),
+                                    ),
+                                  ],
+                                );
+                              },
+                            );
+
+                            if (reason != null && reason.isNotEmpty) {
+                              try {
+                                await ref.read(feedProvider(const FeedFilter()).notifier).reportIssue(issue.id, reason);
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(content: Text('Issue reported for review successfully.')),
+                                  );
+                                }
+                              } catch (e) {
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(content: Text('Failed to report issue.')),
+                                  );
+                                }
+                              }
+                            }
+                          }
+                        },
+                      ),
+                    ),
+                ],
+              ),
+            ),
+            
+            // ── Image (Clean Radius) ────────────────────────────────────
+            if (issue.photoUrl.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: CachedNetworkImage(
+                    imageUrl: issue.photoUrl,
+                    height: 180,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                    placeholder: (_, __) => Container(
+                      height: 180,
+                      color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                      child: const Center(child: CircularProgressIndicator(strokeWidth: 2)),
+                    ),
+                    errorWidget: (_, __, ___) => Container(
+                      height: 120,
+                      color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                      child: Icon(Icons.image_not_supported_outlined,
+                          color: theme.colorScheme.outline, size: 40),
+                    ),
                   ),
                 ),
               ),
 
+            // ── Title & Description ─────────────────────────────────────
             Padding(
-              padding: const EdgeInsets.fromLTRB(14, 12, 14, 8),
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // ── Category pill + status ────────────────────────────
                   Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: catColor.withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(catIcon, size: 14, color: catColor),
-                            const SizedBox(width: 4),
-                            Text(
-                              issue.category,
-                              style: TextStyle(
-                                color: catColor,
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
+                      Expanded(
+                        child: Text(
+                          issue.title,
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            height: 1.2,
+                            letterSpacing: -0.2,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                      const Spacer(),
+                      const SizedBox(width: 12),
                       IssueStatusBadge(status: issue.status),
-                      if (isLoggedIn && (currentBackendId.isEmpty || currentBackendId != issue.authorId))
-                        PopupMenuButton<String>(
-                          icon: Icon(Icons.more_vert, size: 20, color: theme.colorScheme.onSurfaceVariant),
-                          padding: EdgeInsets.zero,
-                          itemBuilder: (context) => [
-                            PopupMenuItem(
-                              value: 'report',
-                              child: Row(
-                                children: [
-                                  Icon(Icons.flag_outlined, size: 20, color: theme.colorScheme.error),
-                                  const SizedBox(width: 8),
-                                  Text('Report Issue', style: TextStyle(color: theme.colorScheme.error)),
-                                ],
-                              ),
-                            ),
-                          ],
-                          onSelected: (value) async {
-                            if (value == 'report') {
-                              String? currentReason;
-                              final reason = await showDialog<String>(
-                                context: context,
-                                builder: (ctx) {
-                                  return AlertDialog(
-                                    title: const Text('Report Issue'),
-                                    content: TextField(
-                                      decoration: const InputDecoration(
-                                        labelText: 'Reason',
-                                        hintText: 'Why is this issue unnecessary or inappropriate?',
-                                      ),
-                                      maxLines: 3,
-                                      onChanged: (val) => currentReason = val,
-                                    ),
-                                    actions: [
-                                      TextButton(
-                                        onPressed: () => Navigator.pop(ctx),
-                                        child: const Text('Cancel'),
-                                      ),
-                                      FilledButton(
-                                        onPressed: () => Navigator.pop(ctx, currentReason),
-                                        child: const Text('Submit'),
-                                      ),
-                                    ],
-                                  );
-                                },
-                              );
-                              
-                              if (reason != null && reason.isNotEmpty) {
-                                try {
-                                  await ref.read(feedProvider(const FeedFilter()).notifier).reportIssue(issue.id, reason);
-                                  if (context.mounted) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(content: Text('Issue reported for review successfully.')),
-                                    );
-                                  }
-                                } catch (e) {
-                                  if (context.mounted) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(content: Text('Failed to report issue.')),
-                                    );
-                                  }
-                                }
-                              }
-                            }
-                          },
-                        ),
                     ],
                   ),
-                  const SizedBox(height: 8),
-
-                  // ── Title ─────────────────────────────────────────────
-                  Text(
-                    issue.title,
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 4),
-
-                  // ── Description ───────────────────────────────────────
+                  const SizedBox(height: 6),
                   Text(
                     issue.description,
                     style: theme.textTheme.bodyMedium?.copyWith(
                       color: theme.colorScheme.onSurfaceVariant,
+                      height: 1.4,
                     ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
+                ],
+              ),
+            ),
 
-                  const SizedBox(height: 12),
-                  const Divider(height: 1),
-                  const SizedBox(height: 8),
+            Divider(height: 1, color: theme.colorScheme.outlineVariant.withValues(alpha: 0.2)),
 
-                  // ── Footer ────────────────────────────────────────────
-                  Row(
-                    children: [
-                      CircleAvatar(
-                        radius: 14,
-                        backgroundColor: catColor.withValues(alpha: 0.15),
-                        child: Text(
-                          (issue.authorName?.isNotEmpty == true
-                                  ? issue.authorName![0]
-                                  : '?')
-                              .toUpperCase(),
-                          style: TextStyle(
-                            color: catColor,
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              issue.authorName ?? 'Anonymous Citizen',
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                fontWeight: FontWeight.w600,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            Text(
-                              DateFormat('MMM d, y').format(issue.createdAt.toLocal()),
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: theme.colorScheme.outline,
-                                fontSize: 11,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      // ── Upvote toggle ────────────────────────────────
-                      InkWell(
-                        borderRadius: BorderRadius.circular(8),
-                        onTap: !isLoggedIn
-                            ? null
-                            : () {
-                                ref
-                                    .read(feedProvider(const FeedFilter()).notifier)
-                                    .upvote(issue.id, voteUserId);
-                              },
-                        child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 200),
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                          decoration: BoxDecoration(
+            // ── Social Footer ───────────────────────────────────────────
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              child: Row(
+                children: [
+                  // Upvote Button
+                  InkWell(
+                    borderRadius: BorderRadius.circular(12),
+                    onTap: !isLoggedIn
+                        ? null
+                        : () {
+                            ref
+                                .read(feedProvider(const FeedFilter()).notifier)
+                                .upvote(issue.id, voteUserId);
+                          },
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      child: Row(
+                        children: [
+                          Icon(
+                            hasVoted
+                                ? Icons.keyboard_double_arrow_up_rounded
+                                : Icons.arrow_upward_rounded,
+                            size: 18,
                             color: hasVoted
-                                ? theme.colorScheme.primary.withValues(alpha: 0.12)
-                                : Colors.transparent,
-                            borderRadius: BorderRadius.circular(8),
+                                ? theme.colorScheme.primary
+                                : theme.colorScheme.outline,
                           ),
-                          child: Row(
-                            children: [
-                              Icon(
-                                hasVoted
-                                    ? Icons.arrow_upward_rounded
-                                    : Icons.arrow_upward_outlined,
-                                size: 16,
-                                color: hasVoted
-                                    ? theme.colorScheme.primary
-                                    : theme.colorScheme.outline,
-                              ),
-                              const SizedBox(width: 4),
-                              Text(
-                                '${issue.urgencyScore}',
-                                style: TextStyle(
-                                  color: hasVoted
-                                      ? theme.colorScheme.primary
-                                      : theme.colorScheme.outline,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 13,
-                                ),
-                              ),
-                            ],
+                          const SizedBox(width: 6),
+                          Text(
+                            hasVoted ? 'Upvoted (${issue.urgencyScore})' : 'Upvote (${issue.urgencyScore})',
+                            style: TextStyle(
+                              color: hasVoted
+                                  ? theme.colorScheme.primary
+                                  : theme.colorScheme.outline,
+                              fontWeight: hasVoted ? FontWeight.bold : FontWeight.w600,
+                              fontSize: 13,
+                            ),
                           ),
-                        ),
+                        ],
                       ),
-                      const SizedBox(width: 6),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
 
-                      // ── Comments ─────────────────────────────────────
-                      InkWell(
-                        borderRadius: BorderRadius.circular(8),
-                        onTap: () => context.go('/feed/comments/${issue.id}'),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
-                          child: Row(
-                            children: [
-                              Icon(Icons.chat_bubble_outline_rounded,
-                                  size: 16, color: theme.colorScheme.secondary),
-                              const SizedBox(width: 4),
-                              Text(
-                                '${issue.commentCount}',
-                                style: TextStyle(
-                                  color: theme.colorScheme.secondary,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 13,
-                                ),
-                              ),
-                            ],
+                  // Comments Button
+                  InkWell(
+                    borderRadius: BorderRadius.circular(12),
+                    onTap: () => context.go('/feed/comments/${issue.id}'),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      child: Row(
+                        children: [
+                          Icon(Icons.chat_bubble_outline_rounded,
+                              size: 16, color: theme.colorScheme.outline),
+                          const SizedBox(width: 6),
+                          Text(
+                            '${issue.commentCount}',
+                            style: TextStyle(
+                              color: theme.colorScheme.outline,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 13,
+                            ),
                           ),
-                        ),
+                        ],
                       ),
-                    ],
+                    ),
                   ),
                 ],
               ),

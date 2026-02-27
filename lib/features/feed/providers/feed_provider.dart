@@ -12,18 +12,23 @@ class FeedFilter {
   const FeedFilter({
     this.sort = 'closest',
     this.kebele = 'All',
+    this.search = '',
   });
 
   final String sort;
   final String kebele;
+  final String search;
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      (other is FeedFilter && other.sort == sort && other.kebele == kebele);
+      (other is FeedFilter &&
+          other.sort == sort &&
+          other.kebele == kebele &&
+          other.search == search);
 
   @override
-  int get hashCode => sort.hashCode ^ kebele.hashCode;
+  int get hashCode => sort.hashCode ^ kebele.hashCode ^ search.hashCode;
 }
 
 // ---------------------------------------------------------------------------
@@ -329,6 +334,10 @@ class FeedNotifier extends FamilyAsyncNotifier<List<Issue>, FeedFilter> {
 
     if (filter.kebele != 'All') {
       queryParams['kebele'] = filter.kebele;
+    }
+
+    if (filter.search.isNotEmpty) {
+      queryParams['search'] = filter.search;
     }
 
     final resp = await ApiClient.instance.dio.get(
