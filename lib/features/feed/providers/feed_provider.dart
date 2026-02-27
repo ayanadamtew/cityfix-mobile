@@ -251,8 +251,8 @@ final feedProvider = AsyncNotifierProviderFamily<FeedNotifier, List<Issue>, Feed
 class FeedNotifier extends FamilyAsyncNotifier<List<Issue>, FeedFilter> {
   @override
   Future<List<Issue>> build(FeedFilter filter) async {
-    // Ensure socket is connected
-    ref.read(socketProvider.notifier).connect();
+    // Connect to the socket asynchronously to prevent modifying `socketProvider` during build
+    Future.microtask(() => ref.read(socketProvider.notifier).connect());
     
     // Listen to the socket provider securely using Riverpod 2.0 ref.listen
     ref.listen(socketProvider, (previous, socket) {
@@ -439,7 +439,8 @@ final commentsProvider = AsyncNotifierProviderFamily<CommentsNotifier, List<Comm
 class CommentsNotifier extends FamilyAsyncNotifier<List<Comment>, String> {
   @override
   Future<List<Comment>> build(String issueId) async {
-    ref.read(socketProvider.notifier).connect();
+    // Avoid modifying SocketNotifier during build
+    Future.microtask(() => ref.read(socketProvider.notifier).connect());
 
     ref.listen(socketProvider, (previous, socket) {
       if (socket == null) return;
