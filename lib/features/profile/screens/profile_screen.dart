@@ -14,150 +14,153 @@ class ProfileScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final firebaseUser = FirebaseAuth.instance.currentUser;
+    final authProfileAsync = ref.watch(authNotifierProvider);
     final myReportsAsync = ref.watch(myReportsProvider);
     final l = AppLocalizations.of(context)!;
 
-    if (firebaseUser == null) {
-      return Scaffold(
-        body: Center(child: Text(l.notLoggedIn)),
-      );
-    }
+    return authProfileAsync.when(
+      data: (profile) {
+        if (profile == null) {
+          return Scaffold(
+            body: Center(child: Text(l.notLoggedIn)),
+          );
+        }
 
-    // Safely extract stats
-    int totalReports = 0;
-    int resolvedReports = 0;
-    
-    if (myReportsAsync is AsyncData) {
-      final reports = myReportsAsync.value ?? [];
-      totalReports = reports.length;
-      resolvedReports = reports.where((r) => r.status == 'Resolved').length;
-    }
+        // Safely extract stats
+        int totalReports = 0;
+        int resolvedReports = 0;
+        
+        if (myReportsAsync is AsyncData) {
+          final reports = myReportsAsync.value ?? [];
+          totalReports = reports.length;
+          resolvedReports = reports.where((r) => r.status == 'Resolved').length;
+        }
 
-    final settings = ref.watch(settingsProvider);
-    final isPushEnabled = settings['pushNotifications'] ?? true;
+        final settings = ref.watch(settingsProvider);
+        final isPushEnabled = settings['pushNotifications'] ?? true;
 
-    // Language options: code -> display name
-    const languageOptions = {
-      'en': 'English',
-      'am': 'አማርኛ',
-      'om': 'Afaan Oromoo',
-    };
+        // Language options: code -> display name
+        const languageOptions = {
+          'en': 'English',
+          'am': 'አማርኛ',
+          'om': 'Afaan Oromoo',
+        };
 
-    void showEditProfileModal() {
-      showModalBottomSheet(
-        context: context,
-        isScrollControlled: true,
-        backgroundColor: Colors.transparent,
-        builder: (context) => _EditProfileModal(
-          initialName: firebaseUser.displayName ?? '',
-          ref: ref,
-        ),
-      );
-    }
-
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(l.profile),
-        centerTitle: true,
-        elevation: 0,
-        backgroundColor: Colors.transparent,
-      ),
-      body: ListView(
-        padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 8.0),
-        children: [
-          // 1. Hero Header Card
-          Container(
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  Theme.of(context).colorScheme.primary.withOpacity(0.8),
-                  Theme.of(context).colorScheme.primary,
-                ],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              borderRadius: BorderRadius.circular(24),
-              boxShadow: [
-                BoxShadow(
-                  color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
-                  blurRadius: 20,
-                  offset: const Offset(0, 10),
-                ),
-              ],
+        void showEditProfileModal() {
+          showModalBottomSheet(
+            context: context,
+            isScrollControlled: true,
+            backgroundColor: Colors.transparent,
+            builder: (context) => _EditProfileModal(
+              initialName: profile.name,
+              ref: ref,
             ),
-            child: Column(
-              children: [
-                Stack(
-                  alignment: Alignment.bottomRight,
-                  children: [
-                    CircleAvatar(
-                      radius: 48,
-                      backgroundColor: Theme.of(context).colorScheme.onPrimary,
-                      child: Text(
-                        (firebaseUser.displayName?.isNotEmpty == true
-                                ? firebaseUser.displayName![0]
-                                : firebaseUser.email?[0] ?? '?')
-                            .toUpperCase(),
-                        style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                              color: Theme.of(context).colorScheme.primary,
-                              fontWeight: FontWeight.bold,
-                            ),
-                      ),
-                    ),
-                    GestureDetector(
-                      onTap: showEditProfileModal,
-                      child: Container(
-                        padding: const EdgeInsets.all(4),
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.surface,
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(
-                          Icons.edit,
-                          size: 20,
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
-                      ),
+          );
+        }
+
+        final firebaseUser = FirebaseAuth.instance.currentUser;
+        return Scaffold(
+          appBar: AppBar(
+            title: Text(l.profile),
+            centerTitle: true,
+            elevation: 0,
+            backgroundColor: Colors.transparent,
+          ),
+          body: ListView(
+            padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 8.0),
+            children: [
+              // 1. Hero Header Card
+              Container(
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      Theme.of(context).colorScheme.primary.withOpacity(0.8),
+                      Theme.of(context).colorScheme.primary,
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(24),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+                      blurRadius: 20,
+                      offset: const Offset(0, 10),
                     ),
                   ],
                 ),
-                const SizedBox(height: 16),
-                Text(
-                  firebaseUser.displayName?.isNotEmpty == true
-                      ? firebaseUser.displayName!
-                      : 'CitizenUser',
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        color: Theme.of(context).colorScheme.onPrimary,
-                        fontWeight: FontWeight.bold,
+                child: Column(
+                  children: [
+                    Stack(
+                      alignment: Alignment.bottomRight,
+                      children: [
+                        CircleAvatar(
+                          radius: 48,
+                          backgroundColor: Theme.of(context).colorScheme.onPrimary,
+                          child: Text(
+                            (profile.name.isNotEmpty == true
+                                    ? profile.name[0]
+                                    : profile.email[0])
+                                .toUpperCase(),
+                            style: Theme.of(context).textTheme.displaySmall?.copyWith(
+                                  color: Theme.of(context).colorScheme.primary,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                          ),
+                        ),
+                        GestureDetector(
+                          onTap: showEditProfileModal,
+                          child: Container(
+                            padding: const EdgeInsets.all(4),
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).colorScheme.surface,
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              Icons.edit,
+                              size: 20,
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      profile.name.isNotEmpty == true
+                          ? profile.name
+                          : 'CitizenUser',
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                            color: Theme.of(context).colorScheme.onPrimary,
+                            fontWeight: FontWeight.bold,
+                          ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      profile.email,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.8),
+                          ),
+                    ),
+                    const SizedBox(height: 12),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(20),
                       ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  firebaseUser.email ?? '',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.8),
-                      ),
-                ),
-                const SizedBox(height: 12),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        firebaseUser.emailVerified ? Icons.verified : Icons.warning_amber_rounded,
-                        size: 16,
-                        color: Theme.of(context).colorScheme.onPrimary,
-                      ),
-                      const SizedBox(width: 6),
-                      Text(
-                        firebaseUser.emailVerified ? l.verifiedCitizen : l.unverified,
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            (firebaseUser?.emailVerified ?? false) ? Icons.verified : Icons.warning_amber_rounded,
+                            size: 16,
+                            color: Theme.of(context).colorScheme.onPrimary,
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            (firebaseUser?.emailVerified ?? false) ? l.verifiedCitizen : l.unverified,
                         style: TextStyle(
                           color: Theme.of(context).colorScheme.onPrimary,
                           fontSize: 12,
@@ -355,7 +358,11 @@ class ProfileScreen extends ConsumerWidget {
         ],
       ),
     );
-  }
+  },
+  loading: () => const Scaffold(body: Center(child: CircularProgressIndicator())),
+  error: (e, st) => Scaffold(body: Center(child: Text('Error: $e'))),
+);
+}
 
   Widget _buildPolicySheet(BuildContext context, ScrollController controller, AppLocalizations l) {
     return Padding(
