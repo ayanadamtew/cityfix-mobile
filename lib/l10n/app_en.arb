@@ -139,5 +139,6 @@
   "saveChanges": "Save Changes",
   "profileUpdated": "Profile updated successfully!",
   "profileUpdateFailed": "Failed to update profile",
-  "enterName": "Please enter your name"
+  "enterName": "Please enter your name",
+  "retry": "Retry"
 }

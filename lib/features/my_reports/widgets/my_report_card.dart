@@ -9,6 +9,9 @@ import '../../../core/constants.dart';
 import '../../feed/providers/feed_provider.dart';
 import '../../../shared/issue_status_badge.dart';
 
+import '../../../shared/custom_toast.dart';
+import '../../../core/providers/connectivity_provider.dart';
+
 class MyReportCard extends ConsumerWidget {
   const MyReportCard({
     super.key,
@@ -55,6 +58,7 @@ class MyReportCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final l = AppLocalizations.of(context)!;
+    final isOffline = ref.watch(isOfflineProvider);
     final catColor = _categoryColor(issue.category);
     final catIcon = _categoryIcon(issue.category);
 
@@ -196,7 +200,9 @@ class MyReportCard extends ConsumerWidget {
                         SizedBox(
                           height: 32,
                           child: ElevatedButton.icon(
-                            onPressed: onEdit,
+                            onPressed: isOffline 
+                               ? () => ToastService.showInfo(context, l.youAreOffline)
+                               : onEdit,
                             icon: const Icon(Icons.edit, size: 14),
                             label: Text(l.editReport),
                             style: ElevatedButton.styleFrom(
@@ -209,7 +215,9 @@ class MyReportCard extends ConsumerWidget {
                         SizedBox(
                           height: 32,
                           child: ElevatedButton.icon(
-                            onPressed: onFeedback,
+                            onPressed: isOffline 
+                               ? () => ToastService.showInfo(context, l.youAreOffline)
+                               : onFeedback,
                             icon: const Icon(Icons.star_rate_rounded, size: 14),
                             label: Text(l.submitFeedback), // Changed to submitFeedback as "Feedback" was not explicitly in ARB besides button text intent
                             style: ElevatedButton.styleFrom(

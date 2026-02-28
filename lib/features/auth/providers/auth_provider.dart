@@ -120,6 +120,32 @@ class AuthNotifier extends AsyncNotifier<UserProfile?> {
       );
     }
   }
+
+  // ---------------------------------------------------------------------------
+  // Update Profile (Name)
+  // ---------------------------------------------------------------------------
+  Future<void> updateProfile(String newName) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(() async {
+      // 1. Update Firebase display name
+      await user.updateDisplayName(newName);
+      
+      // 2. Sync with backend MongoDB
+      final token = await user.getIdToken();
+      final resp = await ApiClient.instance.dio.put(
+        '/api/citizen/profile',
+        options: Options(headers: {'Authorization': 'Bearer $token'}),
+        data: {
+          'fullName': newName,
+        },
+      );
+
+      return UserProfile.fromJson(resp.data as Map<String, dynamic>);
+    });
+  }
 }
 
 final authNotifierProvider =

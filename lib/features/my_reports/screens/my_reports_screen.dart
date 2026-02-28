@@ -13,10 +13,16 @@ import '../providers/my_reports_provider.dart';
 import '../widgets/my_report_card.dart';
 import '../../../core/constants.dart';
 import '../../../shared/custom_toast.dart';
+import '../../../core/providers/connectivity_provider.dart';
 
-class MyReportsScreen extends ConsumerWidget {
+class MyReportsScreen extends ConsumerStatefulWidget {
   const MyReportsScreen({super.key});
 
+  @override
+  ConsumerState<MyReportsScreen> createState() => _MyReportsScreenState();
+}
+
+class _MyReportsScreenState extends ConsumerState<MyReportsScreen> {
   void _showFeedbackModal(BuildContext context, WidgetRef ref, String issueId) {
     final l = AppLocalizations.of(context)!;
     double selectedRating = 5.0;
@@ -99,36 +105,102 @@ class MyReportsScreen extends ConsumerWidget {
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final state = ref.watch(myReportsProvider);
+    final theme = Theme.of(context);
     final l = AppLocalizations.of(context)!;
+    final isOffline = ref.watch(isOfflineProvider);
+
+    // Listen for connectivity changes to show "Back Online" feedback
+    ref.listen(isOfflineProvider, (previous, current) {
+      if (previous == true && current == false) {
+        ToastService.showSuccess(context, l.backOnline);
+        ref.read(myReportsProvider.notifier).refresh();
+      }
+    });
 
     return Scaffold(
       appBar: AppBar(title: Text(l.myReports)),
-      body: state.when(
-        data: (issues) {
-          if (issues.isEmpty) {
-            return Center(child: Text(l.noReportsYet));
-          }
-          return RefreshIndicator(
-            onRefresh: () => ref.read(myReportsProvider.notifier).refresh(),
-            child: ListView.separated(
-              padding: const EdgeInsets.all(8),
-              itemCount: issues.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 8),
-              itemBuilder: (context, index) {
-                final issue = issues[index];
-                return MyReportCard(
-                  issue: issue,
-                  onEdit: () => _showEditModal(context, ref, issue),
-                  onFeedback: () => _showFeedbackModal(context, ref, issue.id),
+      body: Column(
+        children: [
+          if (isOffline)
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+              color: Colors.red.shade800,
+              child: Row(
+                children: [
+                  const Icon(Icons.wifi_off_rounded, color: Colors.white, size: 16),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      l.offlineMode,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          Expanded(
+            child: state.when(
+              data: (issues) {
+                if (issues.isEmpty) {
+                  return Center(child: Text(l.noReportsYet));
+                }
+                return RefreshIndicator(
+                  onRefresh: () => ref.read(myReportsProvider.notifier).refresh(),
+                  child: ListView.separated(
+                    padding: const EdgeInsets.all(8),
+                    itemCount: issues.length,
+                    separatorBuilder: (_, __) => const SizedBox(height: 8),
+                    itemBuilder: (context, index) {
+                      final issue = issues[index];
+                      return MyReportCard(
+                        issue: issue,
+                        onEdit: () => _showEditModal(context, ref, issue),
+                        onFeedback: () => _showFeedbackModal(context, ref, issue.id),
+                      );
+                    },
+                  ),
                 );
               },
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (e, _) => Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(32.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.cloud_off_rounded,
+                        size: 64,
+                        color: theme.colorScheme.outline,
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        l.failedGeneric(e.toString()),
+                        textAlign: TextAlign.center,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      FilledButton.icon(
+                        onPressed: () => ref.read(myReportsProvider.notifier).refresh(),
+                        icon: const Icon(Icons.refresh_rounded),
+                        label: Text(l.retry),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             ),
-          );
-        },
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Error: $e')),
+          ),
+        ],
       ),
     );
   }

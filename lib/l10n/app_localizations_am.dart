@@ -249,7 +249,7 @@ class AppLocalizationsAm extends AppLocalizations {
   String get editReport => 'ሪፖርት አስተካክል';
 
   @override
-  String get saveChanges => 'ለውጦቹን ያስቀምጡ';
+  String get saveChanges => 'ለውጦችን አስቀምጥ';
 
   @override
   String get updateMapLocation => 'የካርታ ቦታን አዘምን';
@@ -373,4 +373,19 @@ class AppLocalizationsAm extends AppLocalizations {
 
   @override
   String get backOnline => 'ተመልሰዋል! ኢንተርኔት ተያይዟል።';
+
+  @override
+  String get editProfile => 'ፕሮፋይል ያርሙ';
+
+  @override
+  String get profileUpdated => 'ፕሮፋይሉ በተሳካ ሁኔታ ተሻሽሏል!';
+
+  @override
+  String get profileUpdateFailed => 'ፕሮፋይሉን ማሻሻል አልተቻለም';
+
+  @override
+  String get enterName => 'እባክዎን ስምዎን ያስገቡ';
+
+  @override
+  String get retry => 'እንደገና ይሞክሩ';
 }

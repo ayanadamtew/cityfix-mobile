@@ -137,5 +137,6 @@
   "saveChanges": "ለውጦችን አስቀምጥ",
   "profileUpdated": "ፕሮፋይሉ በተሳካ ሁኔታ ተሻሽሏል!",
   "profileUpdateFailed": "ፕሮፋይሉን ማሻሻል አልተቻለም",
-  "enterName": "እባክዎን ስምዎን ያስገቡ"
+  "enterName": "እባክዎን ስምዎን ያስገቡ",
+  "retry": "እንደገና ይሞክሩ"
 }

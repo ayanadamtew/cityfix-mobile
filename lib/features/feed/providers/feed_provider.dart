@@ -12,7 +12,7 @@ import '../../../core/providers/socket_provider.dart';
 // ---------------------------------------------------------------------------
 class FeedFilter {
   const FeedFilter({
-    this.sort = 'closest',
+    this.sort = 'recent',
     this.kebele = 'All',
     this.search = '',
   });
@@ -408,8 +408,8 @@ class FeedNotifier extends FamilyAsyncNotifier<List<Issue>, FeedFilter> {
       }
     }
     
-    List<Issue> issues = data
-        .map((json) => Issue.fromJson(json as Map<String, dynamic>))
+    List<Issue> issues = (data as List)
+        .map<Issue>((json) => Issue.fromJson(json as Map<String, dynamic>))
         .toList();
 
     // ── Geospatial Sorting ───────────────────────────────────────────────────

@@ -376,4 +376,19 @@ class AppLocalizationsOm extends AppLocalizations {
 
   @override
   String get backOnline => 'Back online. Connectivity restored!';
+
+  @override
+  String get editProfile => 'Edit Profile';
+
+  @override
+  String get profileUpdated => 'Profile updated successfully!';
+
+  @override
+  String get profileUpdateFailed => 'Failed to update profile';
+
+  @override
+  String get enterName => 'Please enter your name';
+
+  @override
+  String get retry => 'Retry';
 }

@@ -10,6 +10,7 @@ import '../widgets/issue_card.dart';
 import '../../notifications/providers/notifications_provider.dart';
 import '../../../core/providers/connectivity_provider.dart';
 import '../../../shared/custom_toast.dart';
+import '../../profile/providers/settings_provider.dart';
 
 class FeedScreen extends ConsumerStatefulWidget {
   const FeedScreen({super.key, this.isSearchFocused = false});
@@ -146,6 +147,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                     ],
                   ),
             actions: [
+              _buildLanguageToggle(context, ref),
               _buildNotificationBell(context, ref, notifications, l),
               const SizedBox(width: 8),
             ],
@@ -165,9 +167,9 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                   physics: const BouncingScrollPhysics(),
                   child: Row(
                     children: [
-                      _buildSortChip('closest', l.feedNear, Icons.my_location),
-                      const SizedBox(width: 6),
                       _buildSortChip('recent', l.feedNew, Icons.access_time),
+                      const SizedBox(width: 6),
+                      _buildSortChip('closest', l.feedNear, Icons.my_location),
                       const SizedBox(width: 6),
                       _buildSortChip('urgent', l.feedUrgent, Icons.local_fire_department),
                       const SizedBox(width: 12),
@@ -323,6 +325,61 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
           });
         }
       },
+    );
+  }
+
+  Widget _buildLanguageToggle(BuildContext context, WidgetRef ref) {
+    final settings = ref.watch(settingsProvider);
+    final currentLocale = settings['locale'] ?? 'en';
+    final theme = Theme.of(context);
+
+    String label;
+    String nextLocale;
+    switch (currentLocale) {
+      case 'en':
+        label = 'En';
+        nextLocale = 'am';
+        break;
+      case 'am':
+        label = 'አማ';
+        nextLocale = 'om';
+        break;
+      case 'om':
+        label = 'Af';
+        nextLocale = 'en';
+        break;
+      default:
+        label = 'En';
+        nextLocale = 'am';
+    }
+
+    return GestureDetector(
+      onTap: () => ref.read(settingsProvider.notifier).updateLocale(nextLocale),
+      child: Center(
+        child: Container(
+          width: 38,
+          height: 38,
+          margin: const EdgeInsets.only(right: 4),
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: theme.colorScheme.primaryContainer.withValues(alpha: 0.3),
+            border: Border.all(
+              color: theme.colorScheme.primary.withValues(alpha: 0.1),
+              width: 1,
+            ),
+          ),
+          alignment: Alignment.center,
+          child: Text(
+            label,
+            style: TextStyle(
+              fontWeight: FontWeight.w900,
+              fontSize: 13,
+              color: theme.colorScheme.primary,
+              letterSpacing: -0.5,
+            ),
+          ),
+        ),
+      ),
     );
   }
 

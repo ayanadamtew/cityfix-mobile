@@ -44,6 +44,18 @@ class ProfileScreen extends ConsumerWidget {
       'om': 'Afaan Oromoo',
     };
 
+    void showEditProfileModal() {
+      showModalBottomSheet(
+        context: context,
+        isScrollControlled: true,
+        backgroundColor: Colors.transparent,
+        builder: (context) => _EditProfileModal(
+          initialName: firebaseUser.displayName ?? '',
+          ref: ref,
+        ),
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: Text(l.profile),
@@ -94,16 +106,19 @@ class ProfileScreen extends ConsumerWidget {
                             ),
                       ),
                     ),
-                    Container(
-                      padding: const EdgeInsets.all(4),
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.surface,
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        Icons.edit,
-                        size: 20,
-                        color: Theme.of(context).colorScheme.primary,
+                    GestureDetector(
+                      onTap: showEditProfileModal,
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.surface,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          Icons.edit,
+                          size: 20,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
                       ),
                     ),
                   ],
@@ -477,6 +492,108 @@ class _SettingsTile extends StatelessWidget {
             color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+    );
+  }
+}
+
+class _EditProfileModal extends StatefulWidget {
+  final String initialName;
+  final WidgetRef ref;
+
+  const _EditProfileModal({required this.initialName, required this.ref});
+
+  @override
+  State<_EditProfileModal> createState() => _EditProfileModalState();
+}
+
+class _EditProfileModalState extends State<_EditProfileModal> {
+  late final TextEditingController _nameCtrl;
+  bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _nameCtrl = TextEditingController(text: widget.initialName);
+  }
+
+  @override
+  void dispose() {
+    _nameCtrl.dispose();
+    super.dispose();
+  }
+
+  Future<void> _handleSave() async {
+    final name = _nameCtrl.text.trim();
+    final l = AppLocalizations.of(context)!;
+
+    if (name.isEmpty) {
+      ToastService.showError(context, l.enterName);
+      return;
+    }
+
+    setState(() => _isLoading = true);
+    try {
+      await widget.ref.read(authNotifierProvider.notifier).updateProfile(name);
+      if (mounted) {
+        Navigator.pop(context);
+        ToastService.showSuccess(context, l.profileUpdated);
+      }
+    } catch (e) {
+      if (mounted) {
+        ToastService.showError(context, '${l.profileUpdateFailed}: $e');
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final l = AppLocalizations.of(context)!;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).viewInsets.bottom,
+        left: 24,
+        right: 24,
+        top: 24,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            l.editProfile,
+            style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 24),
+          TextField(
+            controller: _nameCtrl,
+            decoration: InputDecoration(
+              labelText: l.fullName,
+              border: const OutlineInputBorder(),
+              prefixIcon: const Icon(Icons.person_outline),
+            ),
+          ),
+          const SizedBox(height: 24),
+          FilledButton(
+            onPressed: _isLoading ? null : _handleSave,
+            child: _isLoading
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                  )
+                : Text(l.saveChanges),
+          ),
+          const SizedBox(height: 32),
+        ],
+      ),
     );
   }
 }
