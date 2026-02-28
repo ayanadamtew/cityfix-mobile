@@ -547,7 +547,7 @@ class _EditProfileModalState extends State<_EditProfileModal> {
       }
     } catch (e) {
       if (mounted) {
-        ToastService.showError(context, '${l.profileUpdateFailed}: $e');
+        ToastService.showError(context, l.failedGeneric(e.toString()));
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);

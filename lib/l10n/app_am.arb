@@ -138,5 +138,11 @@
   "profileUpdated": "ፕሮፋይሉ በተሳካ ሁኔታ ተሻሽሏል!",
   "profileUpdateFailed": "ፕሮፋይሉን ማሻሻል አልተቻለም",
   "enterName": "እባክዎን ስምዎን ያስገቡ",
-  "retry": "እንደገና ይሞክሩ"
+  "retry": "እንደገና ይሞክሩ",
+  "commentFailed": "አስተያየት መለጠፍ አልተሳካም: {error}",
+  "@commentFailed": {"placeholders": {"error": {"type": "String"}}},
+  "loginFailed": "መግባት አልተሳካም: {error}",
+  "@loginFailed": {"placeholders": {"error": {"type": "String"}}},
+  "registrationFailed": "ምዝገባ አልተሳካም: {error}",
+  "@registrationFailed": {"placeholders": {"error": {"type": "String"}}}
 }

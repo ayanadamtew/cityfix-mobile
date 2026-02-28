@@ -128,5 +128,19 @@
   "@commentsCount": {"placeholders": {"count": {"type": "int"}}},
   "noCommentsYet": "Hanga ammaatti yaadni kenname hin jiru. Marii jalqabaa ta'i!",
   "commentHint": "Yaada gargaaru dabali...",
-  "reportLocation": "Bakka Gabaasaa"
+  "reportLocation": "Bakka Gabaasaa",
+  "offlineMode": "Haala Offline - Deetaa Kuufame Ilaaluu",
+  "youAreOffline": "Itti fufiinsa interneetii hin qabdu. Walqunnamtiin dhaabbateera.",
+  "backOnline": "Interneetii argatteetta. Quunnamtiin deebi'eera!",
+  "editProfile": "Profaayilii Gulaali",
+  "profileUpdated": "Profaayiliin milkaa'inaan haaromfameera!",
+  "profileUpdateFailed": "Profaayilii haaromsuun hin danda'amne",
+  "enterName": "Maaloo maqaa keessan galchaa",
+  "retry": "Irra deebi'i",
+  "commentFailed": "Yaada kennuun hin danda'amne: {error}",
+  "@commentFailed": {"placeholders": {"error": {"type": "String"}}},
+  "loginFailed": "Seenuun hin danda'amne: {error}",
+  "@loginFailed": {"placeholders": {"error": {"type": "String"}}},
+  "registrationFailed": "Galmaa'uun hin danda'amne: {error}",
+  "@registrationFailed": {"placeholders": {"error": {"type": "String"}}}
 }

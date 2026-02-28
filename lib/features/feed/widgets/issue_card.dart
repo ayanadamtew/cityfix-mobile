@@ -57,15 +57,15 @@ class IssueCard extends ConsumerWidget {
     final isOffline = ref.watch(isOfflineProvider);
 
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+      margin: const EdgeInsets.symmetric(horizontal: 0, vertical: 8),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // ── Avatar Outside ──────────────────────────────────────────
           Padding(
-            padding: const EdgeInsets.only(top: 8.0, left: 8.0, right: 12.0),
+            padding: const EdgeInsets.only(top: 8.0, left: 4.0, right: 8.0),
             child: CircleAvatar(
-              radius: 18,
+              radius: 20,
               backgroundColor: catColor.withValues(alpha: 0.15),
               backgroundImage: issue.authorPhotoUrl != null ? CachedNetworkImageProvider(issue.authorPhotoUrl!) : null,
               child: issue.authorPhotoUrl == null ? Text(
@@ -88,7 +88,7 @@ class IssueCard extends ConsumerWidget {
               clipBehavior: Clip.none,
               children: [
                 Container(
-                  margin: const EdgeInsets.only(right: 8.0),
+                  margin: const EdgeInsets.only(right: 12.0),
                   decoration: BoxDecoration(
                     color: theme.colorScheme.surface,
                     borderRadius: BorderRadius.circular(24),
@@ -250,18 +250,18 @@ class IssueCard extends ConsumerWidget {
                     // ── Image (Clean Radius) ────────────────────────────────────
                     if (issue.photoUrl.isNotEmpty)
                       Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        padding: EdgeInsets.zero,
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(12),
                           child: Hero(
                             tag: 'issue_image_${issue.id}',
                             child: CachedNetworkImage(
                               imageUrl: issue.photoUrl,
-                              height: 180,
+                              height: 350,
                               width: double.infinity,
                               fit: BoxFit.cover,
                               placeholder: (_, __) => Container(
-                                height: 180,
+                                height: 350,
                                 color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
                                 child: const Center(child: CircularProgressIndicator(strokeWidth: 2)),
                               ),
@@ -290,7 +290,7 @@ class IssueCard extends ConsumerWidget {
                                   issue.title,
                                   style: theme.textTheme.titleMedium?.copyWith(
                                     fontWeight: FontWeight.w800,
-                                    fontSize: 18,
+                                    fontSize: 22,
                                     height: 1.2,
                                     letterSpacing: -0.3,
                                   ),
@@ -308,7 +308,7 @@ class IssueCard extends ConsumerWidget {
                             style: theme.textTheme.bodyMedium?.copyWith(
                               color: theme.colorScheme.onSurfaceVariant,
                               height: 1.4,
-                              fontSize: 14,
+                              fontSize: 16,
                             ),
                             maxLines: 3,
                             overflow: TextOverflow.ellipsis,
@@ -405,7 +405,7 @@ class IssueCard extends ConsumerWidget {
                 // ── Bubble Tail ──
                 Positioned(
                   left: -11,
-                  top: 24,
+                  top: 26,
                   child: CustomPaint(
                     size: const Size(12, 16),
                     painter: _BubbleTailPainter(

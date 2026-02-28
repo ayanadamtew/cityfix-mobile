@@ -369,26 +369,42 @@ class AppLocalizationsOm extends AppLocalizations {
   String get reportLocation => 'Bakka Gabaasaa';
 
   @override
-  String get offlineMode => 'Offline Mode - Viewing Cached Data';
+  String get offlineMode => 'Haala Offline - Deetaa Kuufame Ilaaluu';
 
   @override
-  String get youAreOffline => 'You are offline. Interactions are disabled.';
+  String get youAreOffline =>
+      'Itti fufiinsa interneetii hin qabdu. Walqunnamtiin dhaabbateera.';
 
   @override
-  String get backOnline => 'Back online. Connectivity restored!';
+  String get backOnline => 'Interneetii argatteetta. Quunnamtiin deebi\'eera!';
 
   @override
-  String get editProfile => 'Edit Profile';
+  String get editProfile => 'Profaayilii Gulaali';
 
   @override
-  String get profileUpdated => 'Profile updated successfully!';
+  String get profileUpdated => 'Profaayiliin milkaa\'inaan haaromfameera!';
 
   @override
-  String get profileUpdateFailed => 'Failed to update profile';
+  String get profileUpdateFailed => 'Profaayilii haaromsuun hin danda\'amne';
 
   @override
-  String get enterName => 'Please enter your name';
+  String get enterName => 'Maaloo maqaa keessan galchaa';
 
   @override
-  String get retry => 'Retry';
+  String get retry => 'Irra deebi\'i';
+
+  @override
+  String commentFailed(String error) {
+    return 'Yaada kennuun hin danda\'amne: $error';
+  }
+
+  @override
+  String loginFailed(String error) {
+    return 'Seenuun hin danda\'amne: $error';
+  }
+
+  @override
+  String registrationFailed(String error) {
+    return 'Galmaa\'uun hin danda\'amne: $error';
+  }
 }

@@ -140,5 +140,11 @@
   "profileUpdated": "Profile updated successfully!",
   "profileUpdateFailed": "Failed to update profile",
   "enterName": "Please enter your name",
-  "retry": "Retry"
+  "retry": "Retry",
+  "commentFailed": "Failed to post comment: {error}",
+  "@commentFailed": {"placeholders": {"error": {"type": "String"}}},
+  "loginFailed": "Login failed: {error}",
+  "@loginFailed": {"placeholders": {"error": {"type": "String"}}},
+  "registrationFailed": "Registration failed: {error}",
+  "@registrationFailed": {"placeholders": {"error": {"type": "String"}}}
 }

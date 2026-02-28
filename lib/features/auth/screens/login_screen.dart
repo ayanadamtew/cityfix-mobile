@@ -34,7 +34,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         .login(_emailCtrl.text.trim(), _passCtrl.text);
     final authState = ref.read(authNotifierProvider);
     if (mounted && authState.hasError) {
-      ToastService.showError(context, authState.error.toString());
+      final l = AppLocalizations.of(context)!;
+      ToastService.showError(context, l.loginFailed(authState.error.toString()));
     }
   }
 

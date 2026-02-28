@@ -388,4 +388,19 @@ class AppLocalizationsAm extends AppLocalizations {
 
   @override
   String get retry => 'እንደገና ይሞክሩ';
+
+  @override
+  String commentFailed(String error) {
+    return 'አስተያየት መለጠፍ አልተሳካም: $error';
+  }
+
+  @override
+  String loginFailed(String error) {
+    return 'መግባት አልተሳካም: $error';
+  }
+
+  @override
+  String registrationFailed(String error) {
+    return 'ምዝገባ አልተሳካም: $error';
+  }
 }

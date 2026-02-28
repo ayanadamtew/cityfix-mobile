@@ -88,28 +88,30 @@ class _AppShellState extends State<_AppShell> {
             )
           : null,
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      bottomNavigationBar: AnimatedContainer(
-        duration: const Duration(milliseconds: 300),
-        height: _isBottomBarVisible ? 70.0 : 0.0,
-        child: _isBottomBarVisible 
-          ? BottomAppBar(
-              padding: const EdgeInsets.symmetric(horizontal: 4),
-              shape: const CircularNotchedRectangle(),
-              notchMargin: 8,
-              color: theme.colorScheme.surface,
-              elevation: 0,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                   _buildNavItem(0, Icons.home_outlined, Icons.home, AppLocalizations.of(context)!.navFeed, context),
-                   _buildNavItem(1, Icons.search_outlined, Icons.search, AppLocalizations.of(context)!.navSearch, context),
-                   const SizedBox(width: 48), // FAB Space
-                   _buildNavItem(2, Icons.list_alt_outlined, Icons.list_alt, AppLocalizations.of(context)!.navMyReports, context),
-                   _buildNavItem(3, Icons.person_outline, Icons.person, AppLocalizations.of(context)!.navProfile, context),
-                ],
-              ),
-            )
-          : const SizedBox.shrink(),
+      bottomNavigationBar: ClipRect(
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 300),
+          height: _isBottomBarVisible ? 80.0 : 0.0,
+          child: _isBottomBarVisible 
+            ? BottomAppBar(
+                padding: const EdgeInsets.symmetric(horizontal: 4),
+                shape: const CircularNotchedRectangle(),
+                notchMargin: 8,
+                color: theme.colorScheme.surface,
+                elevation: 0,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                     _buildNavItem(0, Icons.home_outlined, Icons.home, AppLocalizations.of(context)!.navFeed, context),
+                     _buildNavItem(1, Icons.search_outlined, Icons.search, AppLocalizations.of(context)!.navSearch, context),
+                     const SizedBox(width: 48), // FAB Space
+                     _buildNavItem(2, Icons.list_alt_outlined, Icons.list_alt, AppLocalizations.of(context)!.navMyReports, context),
+                     _buildNavItem(3, Icons.person_outline, Icons.person, AppLocalizations.of(context)!.navProfile, context),
+                  ],
+                ),
+              )
+            : const SizedBox.shrink(),
+        ),
       ),
     );
   }

@@ -248,7 +248,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                 );
               }
               return SliverPadding(
-                padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
+                padding: const EdgeInsets.fromLTRB(0, 16, 0, 100),
                 sliver: SliverList(
                   delegate: SliverChildBuilderDelegate(
                     (context, index) {

@@ -41,7 +41,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     if (!mounted) return;
     final authState = ref.read(authNotifierProvider);
     if (authState.hasError) {
-      ToastService.showError(context, authState.error.toString());
+      final l = AppLocalizations.of(context)!;
+      ToastService.showError(context, l.registrationFailed(authState.error.toString()));
     }
   }
 

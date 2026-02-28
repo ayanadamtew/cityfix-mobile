@@ -391,4 +391,19 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get retry => 'Retry';
+
+  @override
+  String commentFailed(String error) {
+    return 'Failed to post comment: $error';
+  }
+
+  @override
+  String loginFailed(String error) {
+    return 'Login failed: $error';
+  }
+
+  @override
+  String registrationFailed(String error) {
+    return 'Registration failed: $error';
+  }
 }

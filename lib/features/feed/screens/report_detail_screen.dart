@@ -48,7 +48,8 @@ class _ReportDetailScreenState extends ConsumerState<ReportDetailScreen> {
       // Though socket should handle it, invalidating ensures consistency
     } catch (e) {
       if (mounted) {
-        ToastService.showError(context, 'Failed to post comment: $e');
+        final l = AppLocalizations.of(context)!;
+        ToastService.showError(context, l.commentFailed(e.toString()));
       }
     } finally {
       if (mounted) setState(() => _isPosting = false);
