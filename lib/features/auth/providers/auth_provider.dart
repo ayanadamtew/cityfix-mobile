@@ -33,7 +33,7 @@ class UserProfile {
     final u = json['user'] as Map<String, dynamic>? ?? json;
     return UserProfile(
       id: u['_id'] as String? ?? u['id'] as String? ?? '',
-      name: u['name'] as String? ?? '',
+      name: u['fullName'] as String? ?? u['name'] as String? ?? '',
       email: u['email'] as String? ?? '',
       photoUrl: u['photoUrl'] as String?,
     );
@@ -136,7 +136,7 @@ class AuthNotifier extends AsyncNotifier<UserProfile?> {
       // 2. Sync with backend MongoDB
       final token = await user.getIdToken();
       final resp = await ApiClient.instance.dio.put(
-        '/api/citizen/profile',
+        '/api/auth/profile',
         options: Options(headers: {'Authorization': 'Bearer $token'}),
         data: {
           'fullName': newName,
