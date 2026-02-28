@@ -91,7 +91,7 @@ class _AppShellState extends State<_AppShell> {
       bottomNavigationBar: ClipRect(
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 300),
-          height: _isBottomBarVisible ? 80.0 : 0.0,
+          height: _isBottomBarVisible ? 90.0 : 0.0,
           child: _isBottomBarVisible 
             ? BottomAppBar(
                 padding: const EdgeInsets.symmetric(horizontal: 4),

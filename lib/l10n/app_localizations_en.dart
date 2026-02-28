@@ -116,19 +116,19 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get privacyIntro =>
-      'Your privacy is important to us. This policy explains how we handle your data.';
+      'Welcome to CityFix, an urban civic issue reporting and management system designed for the Jimma City Administration. Our platform aims to enhance communication between citizens and municipal authorities to improve urban service delivery. This Privacy Policy explains how we collect, use, protect, and share your information when you use the CityFix mobile application and web platform.\n\nEffective Date: February 27, 2026';
 
   @override
   String get privacyDataCollection =>
-      '1. Data Collection\nWe collect location and photo data strictly for public civic issue reporting, minimizing personal telemetry.';
+      '2. Information We Collect\nTo provide and improve our services, we collect the following types of information:\n\n• Account Information: full name, email, phone, address, and profile image.\n• Authentication Data: securely hashed passwords.\n• Issue Report Data: description, category, and Kebele.\n• Media and Location Data: optional photos and exact GPS coordinates.\n• Engagement Data: urgency votes, feedback comments, and reporting history.';
 
   @override
   String get privacyDataSecurity =>
-      '2. Data Security\nWe encrypt your data aligning with standard municipality guidelines.';
+      '3. How We Use Your Information\nWe use your data to:\n\n• Provide Services: register/log you in via Firebase.\n• Route and Resolve Issues: send reports to appropriate municipal sectors.\n• Communicate with You: send real-time notifications.\n• Analyze and Plan: generate analytical reports for city planners.';
 
   @override
   String get privacyNotifications =>
-      '3. Push Notifications\nWe use Firebase Cloud Messaging securely to update you on issue resolutions locally.';
+      '4. Data Sharing and Disclosure\nYour data is shared strictly for operational purposes:\n\n• Municipal Authorities: reports, photos, and GPS locations are visible to Kebele-level officials and Sector Administrators.\n• System Administrators: Super Administrators oversee system operations.\n\n5. Data Security\nWe protect your data via:\n\n• Secure Storage: cloud-based databases (MongoDB/Firebase).\n• Encryption: HTTPS protocols for all communications.\n• Access Control: role-based access enforce strict permissions.\n\n6. Your Rights and Choices\n• Profile Management: update your info anytime.\n• Notifications: toggle alerts in settings.\n• Tracking: view your history and track status without admin interference.\n\n7. Contact Us\nIf you have any questions or concerns about this Privacy Policy or how your data is handled, please contact the Jimma City Administration or visit your local Kebele office.';
 
   @override
   String get feedNear => 'Near';
@@ -406,4 +406,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String registrationFailed(String error) {
     return 'Registration failed: $error';
   }
+
+  @override
+  String get errorInvalidCredentials =>
+      'Invalid email or password. Please try again.';
+
+  @override
+  String get errorNetwork => 'Network error. Please check your connection.';
+
+  @override
+  String get errorTooManyRequests =>
+      'Too many attempts. Please try again later.';
+
+  @override
+  String get errorUnknown => 'An unexpected error occurred. Please try again.';
+
+  @override
+  String get errorEmailInUse =>
+      'This email is already in use by another account.';
 }

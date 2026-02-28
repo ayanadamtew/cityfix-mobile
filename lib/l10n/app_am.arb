@@ -39,10 +39,10 @@
   "helpContent": "የሲቲፊክስ መተግበሪያን ለመጠቀም እርዳታ ከፈለጉ፣ support@cityfix.com ወይም ለድንገተኛ ሁኔታዎች 911 ይደውሉ።",
   "close": "ዝጋ",
   "signOut": "ውጣ",
-  "privacyIntro": "የእርስዎ ግለኝነት ለእኛ ጠቃሚ ነው። ይህ ፖሊሲ ውሂብዎን እንዴት እንደምናስተናግድ ያብራራል።",
-  "privacyDataCollection": "1. የውሂብ ስብስብ\nለሕዝባዊ ዜጋ ጉዳይ ሪፖርት ብቻ የቦታ እና የፎቶ ውሂብ እንሰበስባለን።",
-  "privacyDataSecurity": "2. የውሂብ ደህንነት\nውሂብዎን ከደረጃ ደረጃ ደህንነት ደንቦች ጋር ተስማምቶ ምሰጠናል።",
-  "privacyNotifications": "3. የግፊት ማሳወቂያዎች\nስለ ጉዳይ ውሳኔዎች ለማሳወቅ Firebase Cloud Messaging እንጠቀማለን።",
+  "privacyIntro": "የግላዊነት ፖሊሲ (Privacy Policy)\n\nWelcome to CityFix, an urban civic issue reporting... (English follows for detail)\nEffective Date: February 27, 2026",
+  "privacyDataCollection": "2. Information We Collect... (See English version for details)",
+  "privacyDataSecurity": "3. How We Use Your Information... (See English version for details)",
+  "privacyNotifications": "4. Data Sharing and Disclosure... (See English version for details)",
 
   "feedNear": "ቅርብ",
   "feedNew": "አዲስ",
@@ -144,5 +144,10 @@
   "loginFailed": "መግባት አልተሳካም: {error}",
   "@loginFailed": {"placeholders": {"error": {"type": "String"}}},
   "registrationFailed": "ምዝገባ አልተሳካም: {error}",
-  "@registrationFailed": {"placeholders": {"error": {"type": "String"}}}
+  "@registrationFailed": {"placeholders": {"error": {"type": "String"}}},
+  "errorInvalidCredentials": "የተሳሳተ ኢሜይል ወይም የይለፍ ቃል:: እባክዎ እንደገና ይሞክሩ::",
+  "errorNetwork": "የኔትወርክ ችግር:: እባክዎን ግንኙነትዎን ያረጋግጡ::",
+  "errorTooManyRequests": "ብዙ ሙከራዎች ተደርገዋል:: እባክዎ ቆይተው እንደገና ይሞክሩ::",
+  "errorUnknown": "ያልተጠበቀ ስህተት ተከስቷል:: እባክዎ እንደገና ይሞክሩ::",
+  "errorEmailInUse": "ይህ ኢሜይል ቀደም ብሎ በሌላ መለያ ጥቅም ላይ ውሏል::"
 }

@@ -116,19 +116,19 @@ class AppLocalizationsOm extends AppLocalizations {
 
   @override
   String get privacyIntro =>
-      'Icciitiin keessan nu biratti barbaachisaadha. Imaammanni kun deetaa keessan akkamitti to\'annuu ibsa.';
+      'Imaammata Icciitii (Privacy Policy)\n\nWelcome to CityFix, an urban civic issue reporting... (English follows for detail)\nEffective Date: February 27, 2026';
 
   @override
   String get privacyDataCollection =>
-      '1. Walitti Qabiinsa Deetaa\nRakkolee hawaasaa gaabasuuf qofa bakka jireenyaa fi suuraa walitti qabna.';
+      '2. Information We Collect... (See English version for details)';
 
   @override
   String get privacyDataSecurity =>
-      '2. Nageenyaa Deetaa\nDeetaa keessan seera magaalaatiin walsimsiisee eenye.';
+      '3. How We Use Your Information... (See English version for details)';
 
   @override
   String get privacyNotifications =>
-      '3. Beeksisa Erguu\nFurmaata rakkoo isinitti beeksifuuf Firebase Cloud Messaging fayyadamna.';
+      '4. Data Sharing and Disclosure... (See English version for details)';
 
   @override
   String get feedNear => 'Dhiyoo';
@@ -405,6 +405,26 @@ class AppLocalizationsOm extends AppLocalizations {
 
   @override
   String registrationFailed(String error) {
-    return 'Galmaa\'uun hin danda\'amne: $error';
+    return 'Galmeessuun hin dandahamne: $error';
   }
+
+  @override
+  String get errorInvalidCredentials =>
+      'Iimeeyilii ykn paswaardii dogoggoraa. Maaloo irra deebi\'ii yaali.';
+
+  @override
+  String get errorNetwork =>
+      'Rakkina interneetii. Maaloo quunnamsiisa kee mirkaneeffadhu.';
+
+  @override
+  String get errorTooManyRequests =>
+      'Yaalii baay\'ee. Maaloo yeroo muraasa booda irra deebi\'ii yaali.';
+
+  @override
+  String get errorUnknown =>
+      'Rakkina hin eegamne uumameera. Maaloo irra deebi\'ii yaali.';
+
+  @override
+  String get errorEmailInUse =>
+      'Iimeeyiliin kun kanaan dura herrega biraatiin itti fayyadamameera.';
 }

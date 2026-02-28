@@ -61,10 +61,10 @@ class ProfileScreen extends ConsumerWidget {
         final firebaseUser = FirebaseAuth.instance.currentUser;
         return Scaffold(
           appBar: AppBar(
-            title: Text(l.profile),
-            centerTitle: true,
-            elevation: 0,
-            backgroundColor: Colors.transparent,
+            title: Text(
+              l.profile,
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
           ),
           body: ListView(
             padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 8.0),
@@ -365,17 +365,25 @@ class ProfileScreen extends ConsumerWidget {
 }
 
   Widget _buildPolicySheet(BuildContext context, ScrollController controller, AppLocalizations l) {
+    final theme = Theme.of(context);
+    final textStyle = theme.textTheme.bodyMedium?.copyWith(height: 1.5);
+    final headerStyle = theme.textTheme.titleMedium?.copyWith(
+      fontWeight: FontWeight.bold,
+      color: theme.colorScheme.primary,
+    );
+
     return Padding(
-      padding: const EdgeInsets.all(24.0),
+      padding: const EdgeInsets.symmetric(horizontal: 24.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          const SizedBox(height: 12),
           Center(
             child: Container(
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.outlineVariant,
+                color: theme.colorScheme.outlineVariant,
                 borderRadius: BorderRadius.circular(4),
               ),
             ),
@@ -383,29 +391,50 @@ class ProfileScreen extends ConsumerWidget {
           const SizedBox(height: 24),
           Text(
             l.privacyPolicy,
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+            style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 16),
           Expanded(
             child: ListView(
               controller: controller,
+              physics: const BouncingScrollPhysics(),
               children: [
                 Text(
                   l.privacyIntro,
-                  style: Theme.of(context).textTheme.bodyLarge,
+                  style: textStyle,
                 ),
-                const SizedBox(height: 16),
-                Text(l.privacyDataCollection),
-                const SizedBox(height: 12),
-                Text(l.privacyDataSecurity),
-                const SizedBox(height: 12),
-                Text(l.privacyNotifications),
-                const SizedBox(height: 32),
+                const SizedBox(height: 24),
+                _buildPolicySection(l.privacyDataCollection, headerStyle, textStyle),
+                const SizedBox(height: 20),
+                _buildPolicySection(l.privacyDataSecurity, headerStyle, textStyle),
+                const SizedBox(height: 20),
+                _buildPolicySection(l.privacyNotifications, headerStyle, textStyle),
+                const SizedBox(height: 48),
               ],
             ),
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildPolicySection(String text, TextStyle? headerStyle, TextStyle? bodyStyle) {
+    final lines = text.split('\n');
+    if (lines.isEmpty) return const SizedBox.shrink();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (lines[0].contains(RegExp(r'^\d\.'))) // Simple check for "1. ", "2. ", etc.
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8.0),
+            child: Text(lines[0], style: headerStyle),
+          ),
+        Text(
+          lines.length > 1 ? lines.sublist(1).join('\n').trim() : lines[0],
+          style: bodyStyle,
+        ),
+      ],
     );
   }
 }

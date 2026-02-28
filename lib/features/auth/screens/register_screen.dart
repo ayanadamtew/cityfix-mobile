@@ -42,8 +42,24 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     final authState = ref.read(authNotifierProvider);
     if (authState.hasError) {
       final l = AppLocalizations.of(context)!;
-      ToastService.showError(context, l.registrationFailed(authState.error.toString()));
+      final errorMessage = _getErrorMessage(authState.error, l);
+      ToastService.showError(context, errorMessage);
     }
+  }
+
+  String _getErrorMessage(Object? error, AppLocalizations l) {
+    if (error == null) return l.registrationFailed('Unknown error');
+    final errorStr = error.toString().toLowerCase();
+
+    if (errorStr.contains('email-already-in-use')) {
+      return l.errorEmailInUse;
+    } else if (errorStr.contains('invalid-email')) {
+      return l.emailInvalid;
+    } else if (errorStr.contains('network-request-failed')) {
+      return l.errorNetwork;
+    }
+
+    return l.registrationFailed(error.toString());
   }
 
   @override

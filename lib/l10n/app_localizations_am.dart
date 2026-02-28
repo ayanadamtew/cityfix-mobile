@@ -116,19 +116,19 @@ class AppLocalizationsAm extends AppLocalizations {
 
   @override
   String get privacyIntro =>
-      'የእርስዎ ግለኝነት ለእኛ ጠቃሚ ነው። ይህ ፖሊሲ ውሂብዎን እንዴት እንደምናስተናግድ ያብራራል።';
+      'የግላዊነት ፖሊሲ (Privacy Policy)\n\nWelcome to CityFix, an urban civic issue reporting... (English follows for detail)\nEffective Date: February 27, 2026';
 
   @override
   String get privacyDataCollection =>
-      '1. የውሂብ ስብስብ\nለሕዝባዊ ዜጋ ጉዳይ ሪፖርት ብቻ የቦታ እና የፎቶ ውሂብ እንሰበስባለን።';
+      '2. Information We Collect... (See English version for details)';
 
   @override
   String get privacyDataSecurity =>
-      '2. የውሂብ ደህንነት\nውሂብዎን ከደረጃ ደረጃ ደህንነት ደንቦች ጋር ተስማምቶ ምሰጠናል።';
+      '3. How We Use Your Information... (See English version for details)';
 
   @override
   String get privacyNotifications =>
-      '3. የግፊት ማሳወቂያዎች\nስለ ጉዳይ ውሳኔዎች ለማሳወቅ Firebase Cloud Messaging እንጠቀማለን።';
+      '4. Data Sharing and Disclosure... (See English version for details)';
 
   @override
   String get feedNear => 'ቅርብ';
@@ -403,4 +403,20 @@ class AppLocalizationsAm extends AppLocalizations {
   String registrationFailed(String error) {
     return 'ምዝገባ አልተሳካም: $error';
   }
+
+  @override
+  String get errorInvalidCredentials =>
+      'የተሳሳተ ኢሜይል ወይም የይለፍ ቃል:: እባክዎ እንደገና ይሞክሩ::';
+
+  @override
+  String get errorNetwork => 'የኔትወርክ ችግር:: እባክዎን ግንኙነትዎን ያረጋግጡ::';
+
+  @override
+  String get errorTooManyRequests => 'ብዙ ሙከራዎች ተደርገዋል:: እባክዎ ቆይተው እንደገና ይሞክሩ::';
+
+  @override
+  String get errorUnknown => 'ያልተጠበቀ ስህተት ተከስቷል:: እባክዎ እንደገና ይሞክሩ::';
+
+  @override
+  String get errorEmailInUse => 'ይህ ኢሜይል ቀደም ብሎ በሌላ መለያ ጥቅም ላይ ውሏል::';
 }

@@ -32,11 +32,31 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     await ref
         .read(authNotifierProvider.notifier)
         .login(_emailCtrl.text.trim(), _passCtrl.text);
+    
+    if (!mounted) return;
     final authState = ref.read(authNotifierProvider);
-    if (mounted && authState.hasError) {
+    if (authState.hasError) {
       final l = AppLocalizations.of(context)!;
-      ToastService.showError(context, l.loginFailed(authState.error.toString()));
+      final errorMessage = _getErrorMessage(authState.error, l);
+      ToastService.showError(context, errorMessage);
     }
+  }
+
+  String _getErrorMessage(Object? error, AppLocalizations l) {
+    if (error == null) return l.loginFailed('Unknown error');
+    final errorStr = error.toString().toLowerCase();
+    
+    if (errorStr.contains('invalid-credential') || 
+        errorStr.contains('user-not-found') || 
+        errorStr.contains('wrong-password')) {
+      return l.errorInvalidCredentials;
+    } else if (errorStr.contains('network-request-failed')) {
+      return l.errorNetwork;
+    } else if (errorStr.contains('too-many-requests')) {
+      return l.errorTooManyRequests;
+    }
+    
+    return l.loginFailed(error.toString());
   }
 
   @override
