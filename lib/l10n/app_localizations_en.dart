@@ -367,4 +367,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get reportLocation => 'Report Location';
+
+  @override
+  String get offlineMode => 'Offline Mode - Viewing Cached Data';
+
+  @override
+  String get youAreOffline => 'You are offline. Interactions are disabled.';
+
+  @override
+  String get backOnline => 'Back online. Connectivity restored!';
 }

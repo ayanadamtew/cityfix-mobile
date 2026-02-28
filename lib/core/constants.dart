@@ -14,6 +14,7 @@ class AppConstants {
   static const String offlineDraftsBox = 'offline_drafts';
   static const String userBox = 'user_box';
   static const String notificationsBox = 'notifications_box';
+  static const String feedBox = 'feed_box';
 
   // ---------------------------------------------------------------------------
   // Issue categories

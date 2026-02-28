@@ -11,6 +11,7 @@ import '../providers/feed_provider.dart';
 import '../../../shared/issue_status_badge.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../../shared/custom_toast.dart';
+import '../../../core/providers/connectivity_provider.dart';
 
 class IssueCard extends ConsumerWidget {
   const IssueCard({super.key, required this.issue});
@@ -53,6 +54,7 @@ class IssueCard extends ConsumerWidget {
     final voteUserId = currentBackendId.isNotEmpty
         ? currentBackendId
         : (firebaseUser?.uid ?? '');
+    final isOffline = ref.watch(isOfflineProvider);
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
@@ -104,7 +106,9 @@ class IssueCard extends ConsumerWidget {
                   ),
                   child: InkWell(
                     borderRadius: BorderRadius.circular(24),
-                    onTap: () => context.go('/feed/comments/${issue.id}'),
+                    onTap: isOffline 
+                        ? () => ToastService.showInfo(context, l.youAreOffline)
+                        : () => context.go('/feed/comments/${issue.id}'),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
@@ -172,11 +176,19 @@ class IssueCard extends ConsumerWidget {
                                 itemBuilder: (context) => [
                                   PopupMenuItem(
                                     value: 'report',
+                                    enabled: !isOffline,
                                     child: Row(
                                       children: [
-                                        Icon(Icons.flag_outlined, size: 20, color: theme.colorScheme.error),
+                                        Icon(
+                                          Icons.flag_outlined, 
+                                          size: 20, 
+                                          color: isOffline ? theme.colorScheme.outline : theme.colorScheme.error
+                                        ),
                                         const SizedBox(width: 8),
-                                        Text(l.reportIssueMenu, style: TextStyle(color: theme.colorScheme.error)),
+                                        Text(
+                                          l.reportIssueMenu, 
+                                          style: TextStyle(color: isOffline ? theme.colorScheme.outline : theme.colorScheme.error)
+                                        ),
                                       ],
                                     ),
                                   ),
@@ -318,6 +330,10 @@ class IssueCard extends ConsumerWidget {
                             onTap: !isLoggedIn
                                 ? null
                                 : () {
+                                    if (isOffline) {
+                                      ToastService.showInfo(context, l.youAreOffline);
+                                      return;
+                                    }
                                     ref
                                         .read(feedProvider(const FeedFilter()).notifier)
                                         .upvote(issue.id, voteUserId);
@@ -357,7 +373,9 @@ class IssueCard extends ConsumerWidget {
                           // Comments Button
                           InkWell(
                             borderRadius: BorderRadius.circular(12),
-                            onTap: () => context.go('/feed/comments/${issue.id}'),
+                            onTap: isOffline 
+                                ? () => ToastService.showInfo(context, l.youAreOffline)
+                                : () => context.go('/feed/comments/${issue.id}'),
                             child: Padding(
                               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                               child: Row(

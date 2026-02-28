@@ -32,6 +32,7 @@ void main() async {
   await Hive.openBox(AppConstants.offlineDraftsBox);
   await Hive.openBox(AppConstants.userBox);
   await Hive.openBox(AppConstants.notificationsBox);
+  await Hive.openBox(AppConstants.feedBox);
 
   // 3. Run App
   final container = ProviderContainer();

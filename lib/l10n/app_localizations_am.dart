@@ -364,4 +364,13 @@ class AppLocalizationsAm extends AppLocalizations {
 
   @override
   String get reportLocation => 'የሪፖርት ቦታ';
+
+  @override
+  String get offlineMode => 'ኦፍላይን ሁነታ - የተቀመጠ ውሂብ በማሳየት ላይ';
+
+  @override
+  String get youAreOffline => 'ኦፍላይን ነዎት። ተግባራት ተሰናክለዋል።';
+
+  @override
+  String get backOnline => 'ተመልሰዋል! ኢንተርኔት ተያይዟል።';
 }

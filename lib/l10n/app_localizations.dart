@@ -771,6 +771,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Report Location'**
   String get reportLocation;
+
+  /// No description provided for @offlineMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline Mode - Viewing Cached Data'**
+  String get offlineMode;
+
+  /// No description provided for @youAreOffline.
+  ///
+  /// In en, this message translates to:
+  /// **'You are offline. Interactions are disabled.'**
+  String get youAreOffline;
+
+  /// No description provided for @backOnline.
+  ///
+  /// In en, this message translates to:
+  /// **'Back online. Connectivity restored!'**
+  String get backOnline;
 }
 
 class _AppLocalizationsDelegate

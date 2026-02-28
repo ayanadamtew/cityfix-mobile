@@ -11,6 +11,7 @@ import '../providers/feed_provider.dart';
 import '../../../core/api_client.dart';
 import '../../../shared/issue_status_badge.dart';
 import '../../../shared/custom_toast.dart';
+import '../../../core/providers/connectivity_provider.dart';
 
 class ReportDetailScreen extends ConsumerStatefulWidget {
   const ReportDetailScreen({super.key, required this.issueId});
@@ -78,7 +79,17 @@ class _ReportDetailScreenState extends ConsumerState<ReportDetailScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final l = AppLocalizations.of(context)!;
+    final isOffline = ref.watch(isOfflineProvider);
     final commentsAsync = ref.watch(commentsProvider(widget.issueId));
+
+    // Listen for connectivity changes to show "Back Online" feedback
+    ref.listen(isOfflineProvider, (previous, current) {
+      if (previous == true && current == false) {
+        ToastService.showSuccess(context, l.backOnline);
+        ref.refresh(commentsProvider(widget.issueId).future);
+        ref.refresh(feedProvider(const FeedFilter()).future);
+      }
+    });
     
     // We try to find the issue in the feed provider first
     final feedState = ref.watch(feedProvider(const FeedFilter()));
@@ -112,8 +123,14 @@ class _ReportDetailScreenState extends ConsumerState<ReportDetailScreen> {
       body: Column(
         children: [
           Expanded(
-            child: CustomScrollView(
-              physics: const BouncingScrollPhysics(),
+            child: RefreshIndicator(
+              onRefresh: () async {
+                await ref.refresh(commentsProvider(widget.issueId).future);
+                // Also refresh the main feed to get updated issue status if it changed
+                await ref.refresh(feedProvider(const FeedFilter()).future);
+              },
+              child: CustomScrollView(
+                physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
               slivers: [
                 // ── App Bar with Hero Image ─────────────────────────────
                 SliverAppBar(
@@ -339,6 +356,7 @@ class _ReportDetailScreenState extends ConsumerState<ReportDetailScreen> {
                 // Extra space at bottom for input field
                 const SliverPadding(padding: EdgeInsets.only(bottom: 100)),
               ],
+            ),
             ),
           ),
 

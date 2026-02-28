@@ -1,5 +1,7 @@
-// lib/features/feed/providers/feed_provider.dart
+import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import '../../../core/constants.dart';
 import 'package:geolocator/geolocator.dart';
 import '../../../core/api_client.dart';
 import '../../../services/location_service.dart';
@@ -183,8 +185,28 @@ class Issue {
       authorPhotoUrl: authorPhotoUrl ?? this.authorPhotoUrl,
       commentCount: commentCount ?? this.commentCount,
       voterIds: voterIds ?? this.voterIds,
-      rawLocation: rawLocation ?? this.rawLocation, // Preserve raw location mapping during vote updates
-    );
+      );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      '_id': id,
+      'title': title,
+      'description': description,
+      'category': category,
+      'status': status,
+      'photoUrl': photoUrl,
+      'urgencyCount': urgencyScore,
+      'createdAt': createdAt.toIso8601String(),
+      'citizenId': {
+        '_id': authorId,
+        'fullName': authorName,
+        'photoUrl': authorPhotoUrl,
+      },
+      'commentsCount': commentCount,
+      'votedUserIds': voterIds,
+      'location': rawLocation,
+    };
   }
 }
 
@@ -352,19 +374,38 @@ class FeedNotifier extends FamilyAsyncNotifier<List<Issue>, FeedFilter> {
       queryParams['search'] = filter.search;
     }
 
-    final resp = await ApiClient.instance.dio.get(
-      '/api/issues',
-      queryParameters: queryParams,
-    );
-    // Handle { data: [...] }, { issues: [...] }, direct arrays, etc.
-    final raw = resp.data;
-    final List data;
-    if (raw is List) {
-      data = raw;
-    } else if (raw is Map) {
-      data = raw['data'] ?? raw['issues'] ?? raw['results'] ?? [];
-    } else {
-      data = [];
+    List data;
+    try {
+      final resp = await ApiClient.instance.dio.get(
+        '/api/issues',
+        queryParameters: queryParams,
+      );
+      // Handle { data: [...] }, { issues: [...] }, direct arrays, etc.
+      final raw = resp.data;
+      if (raw is List) {
+        data = raw;
+      } else if (raw is Map) {
+        data = raw['data'] ?? raw['issues'] ?? raw['results'] ?? [];
+      } else {
+        data = [];
+      }
+
+      // Cache the raw data for offline use
+      final cacheKey = 'feed_${filter.sort}_${filter.kebele}_${filter.search}';
+      final box = Hive.box(AppConstants.feedBox);
+      await box.put(cacheKey, jsonEncode(data));
+    } catch (e) {
+      // If network fails, try loading from cache
+      final cacheKey = 'feed_${filter.sort}_${filter.kebele}_${filter.search}';
+      final box = Hive.box(AppConstants.feedBox);
+      final cachedJson = box.get(cacheKey) as String?;
+      
+      if (cachedJson != null) {
+        data = jsonDecode(cachedJson) as List;
+      } else {
+        // Rethrow if no cache available
+        rethrow;
+      }
     }
     
     List<Issue> issues = data

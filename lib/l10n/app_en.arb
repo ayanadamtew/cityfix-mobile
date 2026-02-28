@@ -130,5 +130,14 @@
   "@commentsCount": {"placeholders": {"count": {"type": "int"}}},
   "noCommentsYet": "No comments yet. Start the conversation!",
   "commentHint": "Add a helpful comment...",
-  "reportLocation": "Report Location"
+  "reportLocation": "Report Location",
+  "offlineMode": "Offline Mode - Viewing Cached Data",
+  "youAreOffline": "You are offline. Interactions are disabled.",
+  "backOnline": "Back online. Connectivity restored!",
+  "editProfile": "Edit Profile",
+  "fullName": "Full Name",
+  "saveChanges": "Save Changes",
+  "profileUpdated": "Profile updated successfully!",
+  "profileUpdateFailed": "Failed to update profile",
+  "enterName": "Please enter your name"
 }

@@ -128,5 +128,14 @@
   "@commentsCount": {"placeholders": {"count": {"type": "int"}}},
   "noCommentsYet": "እስካሁን ምንም አስተያየት የለም። ውይይቱን ይጀምሩ!",
   "commentHint": "ጠቃሚ አስተያየት ያክሉ...",
-  "reportLocation": "የሪፖርት ቦታ"
+  "reportLocation": "የሪፖርት ቦታ",
+  "offlineMode": "ኦፍላይን ሁነታ - የተቀመጠ ውሂብ በማሳየት ላይ",
+  "youAreOffline": "ኦፍላይን ነዎት። ተግባራት ተሰናክለዋል።",
+  "backOnline": "ተመልሰዋል! ኢንተርኔት ተያይዟል።",
+  "editProfile": "ፕሮፋይል ያርሙ",
+  "fullName": "ሙሉ ስም",
+  "saveChanges": "ለውጦችን አስቀምጥ",
+  "profileUpdated": "ፕሮፋይሉ በተሳካ ሁኔታ ተሻሽሏል!",
+  "profileUpdateFailed": "ፕሮፋይሉን ማሻሻል አልተቻለም",
+  "enterName": "እባክዎን ስምዎን ያስገቡ"
 }

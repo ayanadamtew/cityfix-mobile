@@ -8,6 +8,8 @@ import '../../../core/constants.dart';
 import '../providers/feed_provider.dart';
 import '../widgets/issue_card.dart';
 import '../../notifications/providers/notifications_provider.dart';
+import '../../../core/providers/connectivity_provider.dart';
+import '../../../shared/custom_toast.dart';
 
 class FeedScreen extends ConsumerStatefulWidget {
   const FeedScreen({super.key, this.isSearchFocused = false});
@@ -41,13 +43,51 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
   Widget build(BuildContext context) {
     final feedState = ref.watch(feedProvider(_currentFilter));
     final notifications = ref.watch(notificationsProvider);
+    final isOffline = ref.watch(isOfflineProvider);
     final l = AppLocalizations.of(context)!;
+
+    // Listen for connectivity changes to show "Back Online" feedback
+    ref.listen(isOfflineProvider, (previous, current) {
+      if (previous == true && current == false) {
+        ToastService.showSuccess(context, l.backOnline);
+        ref.refresh(feedProvider(_currentFilter).future);
+      }
+    });
 
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surfaceContainerLowest,
-      body: CustomScrollView(
+      body: RefreshIndicator(
+        onRefresh: () => ref.refresh(feedProvider(_currentFilter).future),
+        child: CustomScrollView(
         physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
         slivers: [
+          if (isOffline)
+            SliverToBoxAdapter(
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                color: Theme.of(context).colorScheme.errorContainer,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.cloud_off_rounded,
+                      size: 16,
+                      color: Theme.of(context).colorScheme.onErrorContainer,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      l.offlineMode,
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onErrorContainer,
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
           // ── App Bar ──────────────────────────────────────────────
           SliverAppBar(
             backgroundColor: Theme.of(context).colorScheme.surface.withValues(alpha: 0.8),
@@ -245,6 +285,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
             ),
           ),
         ],
+      ),
       ),
     );
   }
