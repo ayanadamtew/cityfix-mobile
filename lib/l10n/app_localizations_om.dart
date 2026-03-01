@@ -427,4 +427,72 @@ class AppLocalizationsOm extends AppLocalizations {
   @override
   String get errorEmailInUse =>
       'Iimeeyiliin kun kanaan dura herrega biraatiin itti fayyadamameera.';
+
+  @override
+  String get phoneNumber => 'Lakkoofsa Bilbilaa';
+
+  @override
+  String get phoneHint => '+251 91 234 5678';
+
+  @override
+  String get phoneRequired => 'Lakkoofsa bilbilaa barbaachisaadha';
+
+  @override
+  String get phoneInvalid => 'Lakkoofsa bilbilaa sirrii galchi (fakk. +251...)';
+
+  @override
+  String get loginWithPhone => 'Bilbila';
+
+  @override
+  String get loginWithEmail => 'Imeelii';
+
+  @override
+  String get registerWithPhone => 'Bilbila';
+
+  @override
+  String get registerWithEmail => 'Imeelii';
+
+  @override
+  String get sendOtp => 'OTP Ergii';
+
+  @override
+  String otpSent(String phone) {
+    return 'OTP $phone irratti ergame';
+  }
+
+  @override
+  String get enterOtp => 'OTP Galchi';
+
+  @override
+  String get otpHint => 'Lakk. 6-digii';
+
+  @override
+  String get otpRequired => 'OTP galchi';
+
+  @override
+  String get verify => 'Mirkaneeffadhu';
+
+  @override
+  String get otpVerificationTitle => 'Lakkoofsa Kee Mirkaneeffadhu';
+
+  @override
+  String otpVerificationSubtitle(String phone) {
+    return '$phone irratti ergame lackoofsa 6-digii galchi';
+  }
+
+  @override
+  String get resendOtp => 'OTP Irra Ergii';
+
+  @override
+  String get errorInvalidOtp => 'OTP dogoggoraa. Maaloo irra deebi\'ii yaali.';
+
+  @override
+  String get errorOtpExpired => 'OTP yeroon darbee. Haaraa gaafadhu.';
+
+  @override
+  String get errorPhoneInUse =>
+      'Lakkoofsi bilbilaa kun herrega biraatiin itti fayyadamameera.';
+
+  @override
+  String get continueText => 'Itti fufi';
 }

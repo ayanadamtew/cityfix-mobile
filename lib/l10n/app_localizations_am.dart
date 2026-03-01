@@ -419,4 +419,71 @@ class AppLocalizationsAm extends AppLocalizations {
 
   @override
   String get errorEmailInUse => 'ይህ ኢሜይል ቀደም ብሎ በሌላ መለያ ጥቅም ላይ ውሏል::';
+
+  @override
+  String get phoneNumber => 'ስልክ ቁጥር';
+
+  @override
+  String get phoneHint => '+251 91 234 5678';
+
+  @override
+  String get phoneRequired => 'ስልክ ቁጥር ያስፈልጋል';
+
+  @override
+  String get phoneInvalid => 'ትክክለኛ ስልክ ቁጥር ያስገቡ (ለምሳሌ +251...)';
+
+  @override
+  String get loginWithPhone => 'ስልክ';
+
+  @override
+  String get loginWithEmail => 'ኢሜይል';
+
+  @override
+  String get registerWithPhone => 'ስልክ';
+
+  @override
+  String get registerWithEmail => 'ኢሜይል';
+
+  @override
+  String get sendOtp => 'OTP ላክ';
+
+  @override
+  String otpSent(String phone) {
+    return 'OTP ወደ $phone ተልኳል';
+  }
+
+  @override
+  String get enterOtp => 'OTP ያስገቡ';
+
+  @override
+  String get otpHint => '6-አሃዝ ኮድ';
+
+  @override
+  String get otpRequired => 'OTP ያስፈልጋል';
+
+  @override
+  String get verify => 'አረጋግጥ';
+
+  @override
+  String get otpVerificationTitle => 'ቁጥርዎን ያረጋግጡ';
+
+  @override
+  String otpVerificationSubtitle(String phone) {
+    return 'ወደ $phone የተላከውን 6-አሃዝ ኮድ ያስገቡ';
+  }
+
+  @override
+  String get resendOtp => 'OTP እንደገና ላክ';
+
+  @override
+  String get errorInvalidOtp => 'የተሳሳተ OTP። እባክዎ እንደገና ይሞክሩ';
+
+  @override
+  String get errorOtpExpired => 'OTP ጊዜ አልፏል። አዲስ ይጠይቁ';
+
+  @override
+  String get errorPhoneInUse => 'ይህ ስልክ ቁጥር ቀደም ብሎ ለሌላ መለያ ጥቅም ላይ ውሏል';
+
+  @override
+  String get continueText => 'ቀጥል';
 }

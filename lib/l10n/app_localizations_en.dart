@@ -424,4 +424,72 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get errorEmailInUse =>
       'This email is already in use by another account.';
+
+  @override
+  String get phoneNumber => 'Phone Number';
+
+  @override
+  String get phoneHint => '+251 91 234 5678';
+
+  @override
+  String get phoneRequired => 'Phone number is required';
+
+  @override
+  String get phoneInvalid => 'Enter a valid phone number (e.g. +251...)';
+
+  @override
+  String get loginWithPhone => 'Phone';
+
+  @override
+  String get loginWithEmail => 'Email';
+
+  @override
+  String get registerWithPhone => 'Phone';
+
+  @override
+  String get registerWithEmail => 'Email';
+
+  @override
+  String get sendOtp => 'Send OTP';
+
+  @override
+  String otpSent(String phone) {
+    return 'OTP sent to $phone';
+  }
+
+  @override
+  String get enterOtp => 'Enter OTP';
+
+  @override
+  String get otpHint => '6-digit code';
+
+  @override
+  String get otpRequired => 'Please enter the OTP';
+
+  @override
+  String get verify => 'Verify';
+
+  @override
+  String get otpVerificationTitle => 'Verify Your Number';
+
+  @override
+  String otpVerificationSubtitle(String phone) {
+    return 'Enter the 6-digit code sent to $phone';
+  }
+
+  @override
+  String get resendOtp => 'Resend OTP';
+
+  @override
+  String get errorInvalidOtp => 'Invalid OTP. Please try again.';
+
+  @override
+  String get errorOtpExpired => 'OTP expired. Please request a new one.';
+
+  @override
+  String get errorPhoneInUse =>
+      'This phone number is already linked to another account.';
+
+  @override
+  String get continueText => 'Continue';
 }

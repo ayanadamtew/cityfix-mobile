@@ -99,9 +99,13 @@ class ProfileScreen extends ConsumerWidget {
                           radius: 48,
                           backgroundColor: Theme.of(context).colorScheme.onPrimary,
                           child: Text(
-                            (profile.name.isNotEmpty == true
+                            (profile.name.isNotEmpty
                                     ? profile.name[0]
-                                    : profile.email[0])
+                                    : (profile.email?.isNotEmpty == true
+                                        ? profile.email![0]
+                                        : (profile.phoneNumber?.isNotEmpty == true
+                                            ? profile.phoneNumber![0]
+                                            : 'U')))
                                 .toUpperCase(),
                             style: Theme.of(context).textTheme.displaySmall?.copyWith(
                                   color: Theme.of(context).colorScheme.primary,
@@ -138,7 +142,7 @@ class ProfileScreen extends ConsumerWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      profile.email,
+                      profile.email ?? profile.phoneNumber ?? '',
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                             color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.8),
                           ),
