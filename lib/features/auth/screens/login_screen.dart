@@ -271,7 +271,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
 
                               // ── Tab content ──────────────────────────────
                               SizedBox(
-                                height: 260, // Fixed height for forms + button
+                                height: 320, // Increased height for forms + button to prevent overflow
                                 child: TabBarView(
                                   controller: _tabController,
                                   physics: const BouncingScrollPhysics(),

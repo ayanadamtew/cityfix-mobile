@@ -287,7 +287,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
 
                             // ── Tab content ──────────────────────────────
                             SizedBox(
-                              height: 230, // Fixed height for forms + button
+                              height: 300, // Increased height for forms + button to prevent overflow
                               child: TabBarView(
                                 controller: _tabController,
                                 physics: const BouncingScrollPhysics(),
