@@ -133,7 +133,15 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                   )
                 : Row(
                     children: [
-                      Icon(Icons.location_city, size: 28, color: Theme.of(context).colorScheme.primary),
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: Image.asset(
+                          'assets/images/splash_screen.jpg',
+                          width: 28,
+                          height: 28,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
                       const SizedBox(width: 8),
                       Text(
                         'CityFix',

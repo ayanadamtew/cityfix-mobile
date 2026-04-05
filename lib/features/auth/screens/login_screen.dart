@@ -167,8 +167,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                               ),
                               borderRadius: BorderRadius.circular(24),
                             ),
-                            child: Icon(Icons.location_city_rounded,
-                                size: 56, color: cs.primary),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(16),
+                              child: Image.asset(
+                                'assets/images/splash_screen.jpg',
+                                width: 56,
+                                height: 56,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
                           ),
                         ),
                       ).animate().fade(duration: 600.ms).scale(delay: 100.ms),
