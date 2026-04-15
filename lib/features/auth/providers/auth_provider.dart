@@ -6,6 +6,8 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:dio/dio.dart';
 import '../../../core/api_client.dart';
 import '../../../core/push_notification_service.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import '../../../core/constants.dart';
 
 // ---------------------------------------------------------------------------
 // Current user stream provider
@@ -105,6 +107,19 @@ class AuthNotifier extends AsyncNotifier<UserProfile?> {
   // ---------------------------------------------------------------------------
   Future<void> logout() async {
     await FirebaseAuth.instance.signOut();
+    
+    // Clear offline cache to prevent cross-account pollution on the same device
+    try {
+      final feedBox = Hive.box(AppConstants.feedBox);
+      await feedBox.clear();
+      final userBox = Hive.box(AppConstants.userBox);
+      await userBox.clear();
+      final notificationsBox = Hive.box(AppConstants.notificationsBox);
+      await notificationsBox.clear();
+    } catch (e) {
+      print('Error clearing Hive cache on logout: $e');
+    }
+
     state = const AsyncData(null);
   }
 
