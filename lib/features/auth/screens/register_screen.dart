@@ -400,23 +400,21 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
                                 ],
                               ),
                             ),
+                            const SizedBox(height: 16),
+                            // ── Login Link ───────────────────────────────────────────
+                            TextButton(
+                              onPressed: () => context.go('/login'),
+                              style: TextButton.styleFrom(
+                                foregroundColor: cs.primary,
+                                textStyle: const TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                              child: Text(l.alreadyHaveAccount),
+                            ).animate().fade(delay: 500.ms),
                           ],
                         ),
                       ),
                     ),
-                  ),
-
-                  const SizedBox(height: 24),
-
-                  // ── Login Link ───────────────────────────────────────────
-                  TextButton(
-                    onPressed: () => context.go('/login'),
-                    style: TextButton.styleFrom(
-                      foregroundColor: cs.primary,
-                      textStyle: const TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    child: Text(l.alreadyHaveAccount),
-                  ).animate().fade(delay: 500.ms),
+                  ).animate().fade(delay: 400.ms).slideY(begin: 0.1),
                 ],
               ),
             ),
