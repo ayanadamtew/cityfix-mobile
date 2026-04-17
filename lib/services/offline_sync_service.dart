@@ -56,15 +56,15 @@ class OfflineSyncService {
 
         // 2. Post to API
         final payload = {
-          'title': draft['title'],
-          'description': draft['description'],
           'category': draft['category'],
+          'description': draft['description'],
           'location': {
-            'type': 'Point',
-            'coordinates': [draft['longitude'], draft['latitude']]
+            'latitude': draft['latitude'],
+            'longitude': draft['longitude'],
+            'address': draft['address'],
+            'kebele': draft['kebele'],
           },
-          'address': draft['address'],
-          'photoUrl': photoUrl,
+          if (photoUrl != null) 'photoUrl': photoUrl,
         };
 
         try {

@@ -59,7 +59,7 @@ class MyReportsNotifier extends AutoDisposeAsyncNotifier<List<Issue>> {
     await ApiClient.instance.dio.post(
       '/api/issues/$issueId/feedback',
       data: {
-        'rating': rating,
+        'rating': rating.toInt(),
         'comment': text,
       },
     );
