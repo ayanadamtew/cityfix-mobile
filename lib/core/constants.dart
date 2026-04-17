@@ -5,7 +5,7 @@ class AppConstants {
   // ---------------------------------------------------------------------------
   // API
   // ---------------------------------------------------------------------------
-  static const String baseUrl = 'http://10.252.167.125:5000'; // Set to physical host IP
+  static const String baseUrl = 'http://10.251.241.125:5000'; // Set to physical host IP
   // Change to your deployed backend URL before production.
 
   // ---------------------------------------------------------------------------

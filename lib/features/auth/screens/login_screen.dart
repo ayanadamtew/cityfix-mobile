@@ -389,25 +389,23 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                                       ),
                                     ),
                                   ],
+                                ),
                               ),
-                            ),
-                          ],
+                              const SizedBox(height: 16),
+                              // ── Register Link ───────────────────────────────────────
+                              TextButton(
+                                onPressed: () => context.go('/register'),
+                                style: TextButton.styleFrom(
+                                  foregroundColor: cs.primary,
+                                  textStyle: const TextStyle(fontWeight: FontWeight.bold),
+                                ),
+                                child: Text(l.noAccount),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
-                    ),
-                  ).animate().fade(delay: 400.ms).slideY(begin: 0.1),
-
-                    const SizedBox(height: 32),
-
-                    // ── Register Link ───────────────────────────────────────
-                    TextButton(
-                      onPressed: () => context.go('/register'),
-                      style: TextButton.styleFrom(
-                        foregroundColor: cs.primary,
-                        textStyle: const TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      child: Text(l.noAccount),
-                    ).animate().fade(delay: 500.ms),
+                    ).animate().fade(delay: 400.ms).slideY(begin: 0.1),
                   ],
                 ),
               ),

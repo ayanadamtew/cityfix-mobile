@@ -97,24 +97,23 @@ class Issue {
       return int.tryParse(v.toString()) ?? 0;
     }
 
-    // Safely extract a nested author field from citizenId (backend field name)
+    // Safely extract a nested author field from citizen or citizenId (backend field name)
     String? citizenField(String key) {
-      // Backend uses 'citizenId' (not 'author') as the populated reference
-      final citizen = json['citizenId'];
+      // Backend uses 'citizen' (PostgreSQL) or 'citizenId' (MongoDB) as the populated reference
+      final citizen = json['citizen'] ?? json['citizenId'];
       if (citizen == null) return null;
       if (citizen is Map) return citizen[key]?.toString();
       return null;
     }
 
-    // Extract the MongoDB _id of the author from the citizenId object
-    // Falls back to direct string citizenId (un-populated reference)
+    // Extract the _id or id of the author
     String? parseAuthorId() {
-      final citizen = json['citizenId'];
+      final citizen = json['citizen'] ?? json['citizenId'];
       if (citizen == null) return null;
       if (citizen is Map) {
-        return citizen['_id']?.toString() ?? citizen['firebaseUid']?.toString();
+        return citizen['id']?.toString() ?? citizen['_id']?.toString() ?? citizen['firebaseUid']?.toString();
       }
-      // citizenId is a raw ObjectId string (not populated)
+      // If it's a raw string (not populated)
       return citizen.toString();
     }
 
@@ -228,7 +227,12 @@ class Comment {
   final String? adminRoleLabel;
 
   factory Comment.fromJson(Map<String, dynamic> json) {
-    // Backend uses citizenId (same as issues) for the populated commenter
+    // Prefer the explicitly populated alias in PostgreSQL ('author'/'citizen') over string IDs
+    dynamic getAuthorData() {
+      return json['author'] ?? json['citizen'] ?? json['authorId'] ?? json['citizenId'];
+    }
+
+    // Backend uses citizenId/authorId (same as issues) for the populated commenter
     String extractAuthor(dynamic citizen) {
       if (citizen == null) return 'Anonymous';
       if (citizen is Map) {
@@ -270,12 +274,12 @@ class Comment {
       id: json['_id']?.toString() ?? json['id']?.toString() ?? '',
       text: json['text']?.toString() ?? json['content']?.toString() ?? '',
       // Backend Comment schema: authorId (populated with fullName, role)
-      authorName: extractAuthor(json['authorId'] ?? json['citizenId'] ?? json['author']),
+      authorName: extractAuthor(getAuthorData()),
       createdAt: json['createdAt'] != null
           ? DateTime.tryParse(json['createdAt'].toString()) ?? DateTime.now()
           : DateTime.now(),
-      isAdmin: checkIsAdmin(json['authorId'] ?? json['citizenId'] ?? json['author']),
-      adminRoleLabel: determineAdminRoleLabel(json['authorId'] ?? json['citizenId'] ?? json['author']),
+      isAdmin: checkIsAdmin(getAuthorData()),
+      adminRoleLabel: determineAdminRoleLabel(getAuthorData()),
     );
   }
 }
