@@ -495,4 +495,29 @@ class AppLocalizationsOm extends AppLocalizations {
 
   @override
   String get continueText => 'Itti fufi';
+
+  @override
+  String get duplicateWarningTitle => 'Gabaasni Walfakkaatu Jiraachuu Danda\'a';
+
+  @override
+  String duplicateWarningBody(String distance) {
+    return 'Gabaasni walfakkaatu fageenya ${distance}m keessatti argame. Maaloo gabaasota jiran ilaalii erguu ittuma itti füfi.';
+  }
+
+  @override
+  String get seeDuplications => 'Gabaasota Walfakkaatoo Ilaali';
+
+  @override
+  String get submitAnyway => 'Haa ta\'uu malee Ergii';
+
+  @override
+  String get nearbyReports => 'Gabaasota Dhiyoo';
+
+  @override
+  String metersAway(String distance) {
+    return '${distance}m fageenya';
+  }
+
+  @override
+  String get checkingDuplicates => 'Gabaasota walfakkaataa barbaadaa...';
 }

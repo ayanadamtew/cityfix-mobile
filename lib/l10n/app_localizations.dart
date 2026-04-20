@@ -993,6 +993,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Continue'**
   String get continueText;
+
+  /// No description provided for @duplicateWarningTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Possible Duplicate Report'**
+  String get duplicateWarningTitle;
+
+  /// No description provided for @duplicateWarningBody.
+  ///
+  /// In en, this message translates to:
+  /// **'A similar report already exists within {distance}m. Please review existing reports before submitting.'**
+  String duplicateWarningBody(String distance);
+
+  /// No description provided for @seeDuplications.
+  ///
+  /// In en, this message translates to:
+  /// **'See Duplications'**
+  String get seeDuplications;
+
+  /// No description provided for @submitAnyway.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit Anyway'**
+  String get submitAnyway;
+
+  /// No description provided for @nearbyReports.
+  ///
+  /// In en, this message translates to:
+  /// **'Nearby Reports'**
+  String get nearbyReports;
+
+  /// No description provided for @metersAway.
+  ///
+  /// In en, this message translates to:
+  /// **'{distance}m away'**
+  String metersAway(String distance);
+
+  /// No description provided for @checkingDuplicates.
+  ///
+  /// In en, this message translates to:
+  /// **'Checking for duplicates...'**
+  String get checkingDuplicates;
 }
 
 class _AppLocalizationsDelegate

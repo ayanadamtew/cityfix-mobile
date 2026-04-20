@@ -5,7 +5,7 @@ class AppConstants {
   // ---------------------------------------------------------------------------
   // API
   // ---------------------------------------------------------------------------
-  // static const String baseUrl = 'http://10.251.241.125:5000'; // Set to physical host IP
+  // static const String baseUrl = 'http://10.12.6.125:5000'; // Set to physical host IP
   static const String baseUrl = 'https://cityfix-backend-4jz2.onrender.com';
   // Change to your deployed backend URL before production.
 

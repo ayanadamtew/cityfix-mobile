@@ -111,6 +111,27 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
       return;
     }
 
+    // ── Duplicate check ──────────────────────────────────────────────────
+    ToastService.showInfo(context, l.checkingDuplicates);
+
+    final dupResult = await ref.read(reportProvider.notifier).checkDuplicate(
+          latitude: _lat,
+          longitude: _lng,
+          category: _category,
+        );
+
+    final isDuplicate = dupResult['isDuplicate'] == true;
+
+    if (isDuplicate && mounted) {
+      final nearbyReports = List<Map<String, dynamic>>.from(
+        (dupResult['nearbyReports'] as List).map((e) => Map<String, dynamic>.from(e)),
+      );
+
+      final shouldProceed = await _showDuplicateWarning(l, nearbyReports);
+      if (shouldProceed != true) return;
+    }
+
+    // ── Proceed with submission ──────────────────────────────────────────
     try {
       final isOfflineSaved = await ref.read(reportProvider.notifier).submit(
             description: _descCtrl.text.trim(),
@@ -136,6 +157,138 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
       if (mounted) {
         ToastService.showError(context, l.failedToSubmit(e.toString()));
       }
+    }
+  }
+
+  /// Shows a warning dialog when duplicates are found.
+  /// Returns true if the user wants to submit anyway.
+  Future<bool?> _showDuplicateWarning(
+    AppLocalizations l,
+    List<Map<String, dynamic>> nearbyReports,
+  ) {
+    final minDistance = nearbyReports
+        .map((r) => r['distance'] as int? ?? 0)
+        .reduce((a, b) => a < b ? a : b);
+
+    return showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        icon: const Icon(Icons.warning_amber_rounded, color: Colors.orange, size: 48),
+        title: Text(l.duplicateWarningTitle),
+        content: Text(l.duplicateWarningBody(minDistance.toString())),
+        actionsAlignment: MainAxisAlignment.spaceBetween,
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(ctx).pop(false);
+              _showNearbyReportsSheet(l, nearbyReports);
+            },
+            child: Text(l.seeDuplications),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: Text(l.submitAnyway),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Shows a bottom sheet listing nearby duplicate reports.
+  void _showNearbyReportsSheet(
+    AppLocalizations l,
+    List<Map<String, dynamic>> nearbyReports,
+  ) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) {
+        final theme = Theme.of(ctx);
+        return DraggableScrollableSheet(
+          initialChildSize: 0.5,
+          minChildSize: 0.3,
+          maxChildSize: 0.85,
+          expand: false,
+          builder: (_, scrollCtrl) => Column(
+            children: [
+              // Handle bar
+              Padding(
+                padding: const EdgeInsets.only(top: 12, bottom: 8),
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.outlineVariant,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: Text(
+                  l.nearbyReports,
+                  style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                ),
+              ),
+              const Divider(),
+              Expanded(
+                child: ListView.separated(
+                  controller: scrollCtrl,
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  itemCount: nearbyReports.length,
+                  separatorBuilder: (_, __) => const Divider(height: 1),
+                  itemBuilder: (_, i) {
+                    final report = nearbyReports[i];
+                    final desc = report['description'] as String? ?? '';
+                    final distance = report['distance']?.toString() ?? '?';
+                    final category = report['category'] as String? ?? '';
+                    final id = report['id'] as String? ?? '';
+
+                    return ListTile(
+                      leading: Icon(
+                        _categoryIcon(category),
+                        color: theme.colorScheme.primary,
+                      ),
+                      title: Text(
+                        desc.length > 80 ? '${desc.substring(0, 80)}...' : desc,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      subtitle: Text(
+                        '${l.metersAway(distance)} • $category',
+                        style: theme.textTheme.bodySmall,
+                      ),
+                      trailing: const Icon(Icons.chevron_right),
+                      onTap: () {
+                        Navigator.of(ctx).pop();
+                        context.push('/feed/comments/$id');
+                      },
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  IconData _categoryIcon(String category) {
+    switch (category) {
+      case 'Water':
+        return Icons.water_drop;
+      case 'Waste':
+        return Icons.delete;
+      case 'Road':
+        return Icons.add_road;
+      case 'Electricity':
+        return Icons.electric_bolt;
+      default:
+        return Icons.report;
     }
   }
 

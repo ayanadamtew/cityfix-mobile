@@ -175,5 +175,15 @@
   "errorInvalidOtp": "Invalid OTP. Please try again.",
   "errorOtpExpired": "OTP expired. Please request a new one.",
   "errorPhoneInUse": "This phone number is already linked to another account.",
-  "continueText": "Continue"
+  "continueText": "Continue",
+
+  "duplicateWarningTitle": "Possible Duplicate Report",
+  "duplicateWarningBody": "A similar report already exists within {distance}m. Please review existing reports before submitting.",
+  "@duplicateWarningBody": {"placeholders": {"distance": {"type": "String"}}},
+  "seeDuplications": "See Duplications",
+  "submitAnyway": "Submit Anyway",
+  "nearbyReports": "Nearby Reports",
+  "metersAway": "{distance}m away",
+  "@metersAway": {"placeholders": {"distance": {"type": "String"}}},
+  "checkingDuplicates": "Checking for duplicates..."
 }

@@ -486,4 +486,29 @@ class AppLocalizationsAm extends AppLocalizations {
 
   @override
   String get continueText => 'ቀጥል';
+
+  @override
+  String get duplicateWarningTitle => 'ተመሳሳይ ሪፖርት ሊኖር ይችላል';
+
+  @override
+  String duplicateWarningBody(String distance) {
+    return 'ተመሳሳይ ሪፖርት በ$distanceሜ ርቀት ይገኛል። ከማስገባትዎ በፊት ያሉትን ሪፖርቶች ይመልከቱ።';
+  }
+
+  @override
+  String get seeDuplications => 'ተመሳሳይ ሪፖርቶችን ይመልከቱ';
+
+  @override
+  String get submitAnyway => 'ቢሆንም ላክ';
+
+  @override
+  String get nearbyReports => 'ቅርብ ሪፖርቶች';
+
+  @override
+  String metersAway(String distance) {
+    return '$distanceሜ ርቀት';
+  }
+
+  @override
+  String get checkingDuplicates => 'ተመሳሳይ ሪፖርቶችን እየፈለጉ...';
 }

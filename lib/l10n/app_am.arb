@@ -173,5 +173,15 @@
   "errorInvalidOtp": "የተሳሳተ OTP። እባክዎ እንደገና ይሞክሩ",
   "errorOtpExpired": "OTP ጊዜ አልፏል። አዲስ ይጠይቁ",
   "errorPhoneInUse": "ይህ ስልክ ቁጥር ቀደም ብሎ ለሌላ መለያ ጥቅም ላይ ውሏል",
-  "continueText": "ቀጥል"
+  "continueText": "ቀጥል",
+
+  "duplicateWarningTitle": "ተመሳሳይ ሪፖርት ሊኖር ይችላል",
+  "duplicateWarningBody": "ተመሳሳይ ሪፖርት በ{distance}ሜ ርቀት ይገኛል። ከማስገባትዎ በፊት ያሉትን ሪፖርቶች ይመልከቱ።",
+  "@duplicateWarningBody": {"placeholders": {"distance": {"type": "String"}}},
+  "seeDuplications": "ተመሳሳይ ሪፖርቶችን ይመልከቱ",
+  "submitAnyway": "ቢሆንም ላክ",
+  "nearbyReports": "ቅርብ ሪፖርቶች",
+  "metersAway": "{distance}ሜ ርቀት",
+  "@metersAway": {"placeholders": {"distance": {"type": "String"}}},
+  "checkingDuplicates": "ተመሳሳይ ሪፖርቶችን እየፈለጉ..."
 }

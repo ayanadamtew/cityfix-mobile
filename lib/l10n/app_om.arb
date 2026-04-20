@@ -171,5 +171,15 @@
   "errorInvalidOtp": "OTP dogoggoraa. Maaloo irra deebi'ii yaali.",
   "errorOtpExpired": "OTP yeroon darbee. Haaraa gaafadhu.",
   "errorPhoneInUse": "Lakkoofsi bilbilaa kun herrega biraatiin itti fayyadamameera.",
-  "continueText": "Itti fufi"
+  "continueText": "Itti fufi",
+
+  "duplicateWarningTitle": "Gabaasni Walfakkaatu Jiraachuu Danda'a",
+  "duplicateWarningBody": "Gabaasni walfakkaatu fageenya {distance}m keessatti argame. Maaloo gabaasota jiran ilaalii erguu ittuma itti füfi.",
+  "@duplicateWarningBody": {"placeholders": {"distance": {"type": "String"}}},
+  "seeDuplications": "Gabaasota Walfakkaatoo Ilaali",
+  "submitAnyway": "Haa ta'uu malee Ergii",
+  "nearbyReports": "Gabaasota Dhiyoo",
+  "metersAway": "{distance}m fageenya",
+  "@metersAway": {"placeholders": {"distance": {"type": "String"}}},
+  "checkingDuplicates": "Gabaasota walfakkaataa barbaadaa..."
 }

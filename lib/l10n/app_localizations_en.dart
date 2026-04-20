@@ -492,4 +492,29 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get continueText => 'Continue';
+
+  @override
+  String get duplicateWarningTitle => 'Possible Duplicate Report';
+
+  @override
+  String duplicateWarningBody(String distance) {
+    return 'A similar report already exists within ${distance}m. Please review existing reports before submitting.';
+  }
+
+  @override
+  String get seeDuplications => 'See Duplications';
+
+  @override
+  String get submitAnyway => 'Submit Anyway';
+
+  @override
+  String get nearbyReports => 'Nearby Reports';
+
+  @override
+  String metersAway(String distance) {
+    return '${distance}m away';
+  }
+
+  @override
+  String get checkingDuplicates => 'Checking for duplicates...';
 }

@@ -136,7 +136,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                       ClipRRect(
                         borderRadius: BorderRadius.circular(8),
                         child: Image.asset(
-                          'assets/images/splash_screen.jpg',
+                          'assets/images/app_icon.png',
                           width: 28,
                           height: 28,
                           fit: BoxFit.cover,
