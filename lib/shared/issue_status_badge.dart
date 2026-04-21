@@ -1,7 +1,7 @@
 // lib/shared/issue_status_badge.dart
 import 'package:flutter/material.dart';
-import 'package:cityfix_mobile/l10n/app_localizations.dart';
-import 'package:cityfix_mobile/shared/l10n_extensions.dart';
+import 'package:cityfix/l10n/app_localizations.dart';
+import 'package:cityfix/shared/l10n_extensions.dart';
 import '../core/constants.dart';
 
 class IssueStatusBadge extends StatelessWidget {

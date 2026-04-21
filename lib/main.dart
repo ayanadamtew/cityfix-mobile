@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:cityfix_mobile/l10n/app_localizations.dart';
+import 'package:cityfix/l10n/app_localizations.dart';
 
 import 'firebase_options.dart';
 import 'core/theme.dart';

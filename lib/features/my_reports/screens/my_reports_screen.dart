@@ -5,8 +5,8 @@ import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:geocoding/geocoding.dart' as geo;
-import 'package:cityfix_mobile/l10n/app_localizations.dart';
-import 'package:cityfix_mobile/shared/l10n_extensions.dart';
+import 'package:cityfix/l10n/app_localizations.dart';
+import 'package:cityfix/shared/l10n_extensions.dart';
 
 import '../../feed/providers/feed_provider.dart';
 import '../providers/my_reports_provider.dart';

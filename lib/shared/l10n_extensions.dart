@@ -1,4 +1,4 @@
-import 'package:cityfix_mobile/l10n/app_localizations.dart';
+import 'package:cityfix/l10n/app_localizations.dart';
 
 extension AppLocalizationsX on AppLocalizations {
   String translateCategory(String category) {

@@ -2,7 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:cityfix_mobile/l10n/app_localizations.dart';
+import 'package:cityfix/l10n/app_localizations.dart';
 import '../providers/auth_provider.dart';
 import '../../../shared/custom_text_field.dart';
 import '../../../shared/custom_toast.dart';

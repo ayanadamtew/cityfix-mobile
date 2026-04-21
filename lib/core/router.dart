@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:go_router/go_router.dart';
 
-import 'package:cityfix_mobile/l10n/app_localizations.dart';
+import 'package:cityfix/l10n/app_localizations.dart';
 
 import '../features/auth/screens/login_screen.dart';
 import '../features/auth/screens/register_screen.dart';
