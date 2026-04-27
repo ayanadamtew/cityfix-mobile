@@ -94,6 +94,21 @@ class MyReportsNotifier extends AutoDisposeAsyncNotifier<List<Issue>> {
     // Also invalidate the main feed so the public sees the update immediately
     ref.invalidate(feedProvider(const FeedFilter()));
   }
+
+  Future<void> deleteIssue(String issueId) async {
+    await ApiClient.instance.dio.delete('/api/issues/$issueId');
+    
+    // Remove locally for snappy UI
+    if (state.hasValue && state.value != null) {
+      final currentList = state.value!;
+      state = AsyncValue.data(
+        currentList.where((i) => i.id != issueId).toList(),
+      );
+    }
+    
+    // Also invalidate the main feed so it drops the deleted issue immediately
+    ref.invalidate(feedProvider(const FeedFilter()));
+  }
 }
 
 final myReportsProvider =

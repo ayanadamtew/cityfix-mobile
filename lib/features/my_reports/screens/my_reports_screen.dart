@@ -104,6 +104,40 @@ class _MyReportsScreenState extends ConsumerState<MyReportsScreen> {
     );
   }
 
+  void _confirmAndDelete(BuildContext context, WidgetRef ref, String issueId) {
+    final l = AppLocalizations.of(context)!;
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text('Delete Report'),
+        content: Text('Are you sure you want to delete this report? This action cannot be undone.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(l.cancel ?? 'Cancel'),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(backgroundColor: Colors.red),
+            onPressed: () async {
+              Navigator.pop(ctx);
+              try {
+                await ref.read(myReportsProvider.notifier).deleteIssue(issueId);
+                if (context.mounted) {
+                  ToastService.showSuccess(context, 'Report deleted successfully');
+                }
+              } catch (e) {
+                if (context.mounted) {
+                  ToastService.showError(context, l.failedGeneric(e.toString()));
+                }
+              }
+            },
+            child: Text('Delete'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(myReportsProvider);
@@ -162,6 +196,7 @@ class _MyReportsScreenState extends ConsumerState<MyReportsScreen> {
                       return MyReportCard(
                         issue: issue,
                         onEdit: () => _showEditModal(context, ref, issue),
+                        onDelete: () => _confirmAndDelete(context, ref, issue.id),
                         onFeedback: () => _showFeedbackModal(context, ref, issue.id),
                       );
                     },

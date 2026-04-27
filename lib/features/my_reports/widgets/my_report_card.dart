@@ -16,13 +16,15 @@ class MyReportCard extends ConsumerWidget {
   const MyReportCard({
     super.key,
     required this.issue,
-    required this.onEdit,
-    required this.onFeedback,
+    this.onEdit,
+    this.onDelete,
+    this.onFeedback,
   });
 
   final Issue issue;
-  final VoidCallback onEdit;
-  final VoidCallback onFeedback;
+  final VoidCallback? onEdit;
+  final VoidCallback? onDelete;
+  final VoidCallback? onFeedback;
 
   Color _categoryColor(String category) {
     switch (category.toLowerCase()) {
@@ -196,21 +198,33 @@ class MyReportCard extends ConsumerWidget {
                         ),
                       ),
                       const Spacer(),
-                      if (isPending)
-                        SizedBox(
-                          height: 32,
-                          child: ElevatedButton.icon(
-                            onPressed: isOffline 
-                               ? () => ToastService.showInfo(context, l.youAreOffline)
-                               : onEdit,
-                            icon: const Icon(Icons.edit, size: 14),
-                            label: Text(l.editReport),
-                            style: ElevatedButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(horizontal: 12),
-                              textStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                      if (isPending) ...[
+                        if (onEdit != null)
+                          SizedBox(
+                            height: 32,
+                            child: ElevatedButton.icon(
+                              onPressed: isOffline 
+                                 ? () => ToastService.showInfo(context, l.youAreOffline)
+                                 : onEdit,
+                              icon: const Icon(Icons.edit, size: 14),
+                              label: Text(l.editReport),
+                              style: ElevatedButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(horizontal: 12),
+                                textStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                              ),
                             ),
                           ),
-                        ),
+                        if (onDelete != null) ...[
+                          const SizedBox(width: 8),
+                          IconButton(
+                            icon: const Icon(Icons.delete_outline, size: 20),
+                            color: Colors.red.shade400,
+                            onPressed: isOffline 
+                               ? () => ToastService.showInfo(context, l.youAreOffline)
+                               : onDelete,
+                          ),
+                        ],
+                      ],
                       if (isResolved)
                         SizedBox(
                           height: 32,
