@@ -313,6 +313,36 @@ class IssueCard extends ConsumerWidget {
                             maxLines: 3,
                             overflow: TextOverflow.ellipsis,
                           ),
+                          if (issue.assignedTechnicianName != null) ...[
+                            const SizedBox(height: 16),
+                            Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: theme.colorScheme.primaryContainer.withValues(alpha: 0.4),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(color: theme.colorScheme.primary.withValues(alpha: 0.2)),
+                              ),
+                              child: Row(
+                                children: [
+                                  Icon(Icons.engineering_outlined, color: theme.colorScheme.primary, size: 28),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text('Assigned Technician', style: theme.textTheme.labelSmall?.copyWith(color: theme.colorScheme.primary, fontWeight: FontWeight.bold)),
+                                        const SizedBox(height: 2),
+                                        Text(
+                                          '${issue.assignedTechnicianName} • ${issue.assignedTechnicianSpecialization ?? 'Technician'}', 
+                                          style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold)
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
                         ],
                       ),
                     ),

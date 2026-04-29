@@ -64,6 +64,9 @@ class Issue {
     this.commentCount = 0,
     this.voterIds = const [],
     this.rawLocation,
+    this.assignedTechnicianName,
+    this.assignedTechnicianSpecialization,
+    this.assignedTechnicianPhone,
   });
 
   final String id;
@@ -84,6 +87,11 @@ class Issue {
 
   // The raw JSON location object from backend
   final Map<String, dynamic>? rawLocation;
+
+  // Assigned Technician Info
+  final String? assignedTechnicianName;
+  final String? assignedTechnicianSpecialization;
+  final String? assignedTechnicianPhone;
 
   // Helpers to safely extract coordinates for 'Closest' sorting
   double? latitude() => double.tryParse(rawLocation?['latitude']?.toString() ?? '');
@@ -133,6 +141,9 @@ class Issue {
       commentCount = parseInt(json['commentCount'] ?? json['commentsCount']);
     }
 
+    final assignment = json['assignment'];
+    final technician = assignment?['technician'];
+
     return Issue(
       id: json['_id']?.toString() ?? json['id']?.toString() ?? '',
       title: json['title']?.toString() ?? '',
@@ -152,6 +163,9 @@ class Issue {
       voterIds: parseVoters(
           json['votedUserIds'] ?? json['upvotedBy'] ?? json['voters'] ?? json['votedBy']),
       rawLocation: json['location'] is Map ? json['location'] as Map<String, dynamic> : null,
+      assignedTechnicianName: technician?['fullName']?.toString(),
+      assignedTechnicianSpecialization: technician?['specialization']?.toString(),
+      assignedTechnicianPhone: technician?['phoneNumber']?.toString(),
     );
   }
   Issue copyWith({
@@ -169,6 +183,9 @@ class Issue {
     int? commentCount,
     List<String>? voterIds,
     Map<String, dynamic>? rawLocation,
+    String? assignedTechnicianName,
+    String? assignedTechnicianSpecialization,
+    String? assignedTechnicianPhone,
   }) {
     return Issue(
       id: id ?? this.id,
@@ -184,6 +201,10 @@ class Issue {
       authorPhotoUrl: authorPhotoUrl ?? this.authorPhotoUrl,
       commentCount: commentCount ?? this.commentCount,
       voterIds: voterIds ?? this.voterIds,
+      rawLocation: rawLocation ?? this.rawLocation,
+      assignedTechnicianName: assignedTechnicianName ?? this.assignedTechnicianName,
+      assignedTechnicianSpecialization: assignedTechnicianSpecialization ?? this.assignedTechnicianSpecialization,
+      assignedTechnicianPhone: assignedTechnicianPhone ?? this.assignedTechnicianPhone,
       );
   }
 
@@ -205,6 +226,13 @@ class Issue {
       'commentsCount': commentCount,
       'votedUserIds': voterIds,
       'location': rawLocation,
+      'assignment': assignedTechnicianName != null ? {
+        'technician': {
+          'fullName': assignedTechnicianName,
+          'specialization': assignedTechnicianSpecialization,
+          'phoneNumber': assignedTechnicianPhone,
+        }
+      } : null,
     };
   }
 }
