@@ -333,7 +333,7 @@ class IssueCard extends ConsumerWidget {
                                         Text('Assigned Technician', style: theme.textTheme.labelSmall?.copyWith(color: theme.colorScheme.primary, fontWeight: FontWeight.bold)),
                                         const SizedBox(height: 2),
                                         Text(
-                                          '${issue.assignedTechnicianName} • ${issue.assignedTechnicianSpecialization ?? 'Technician'}', 
+                                          '${issue.assignedTechnicianName}${issue.assignedTechnicianRating != null ? ' ⭐${issue.assignedTechnicianRating!.toStringAsFixed(1)}' : ''} • ${issue.assignedTechnicianSpecialization ?? 'Technician'}', 
                                           style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold)
                                         ),
                                       ],

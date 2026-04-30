@@ -194,7 +194,7 @@ class MyReportCard extends ConsumerWidget {
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
-                              'Assigned: ${issue.assignedTechnicianName} (${issue.assignedTechnicianSpecialization ?? 'Tech'})',
+                              'Assigned: ${issue.assignedTechnicianName}${issue.assignedTechnicianRating != null ? ' ⭐${issue.assignedTechnicianRating!.toStringAsFixed(1)}' : ''} (${issue.assignedTechnicianSpecialization ?? 'Tech'})',
                               style: theme.textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold, color: theme.colorScheme.primary),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,

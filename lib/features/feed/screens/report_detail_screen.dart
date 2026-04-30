@@ -271,6 +271,36 @@ class _ReportDetailScreenState extends ConsumerState<ReportDetailScreen> {
                           ),
                         ),
                         const SizedBox(height: 24),
+                        if (issue.assignedTechnicianName != null) ...[
+                          Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: theme.colorScheme.primaryContainer.withValues(alpha: 0.4),
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(color: theme.colorScheme.primary.withValues(alpha: 0.2)),
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(Icons.engineering_outlined, color: theme.colorScheme.primary, size: 32),
+                                const SizedBox(width: 16),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text('Assigned Technician', style: theme.textTheme.labelMedium?.copyWith(color: theme.colorScheme.primary, fontWeight: FontWeight.bold)),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        '${issue.assignedTechnicianName}${issue.assignedTechnicianRating != null ? ' ⭐${issue.assignedTechnicianRating!.toStringAsFixed(1)}' : ''} • ${issue.assignedTechnicianSpecialization ?? 'Technician'}', 
+                                        style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 24),
+                        ],
                         // Location Info (If available)
                         if (issue.rawLocation != null) ...[
                            Row(

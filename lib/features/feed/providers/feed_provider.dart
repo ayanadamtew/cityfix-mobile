@@ -67,6 +67,7 @@ class Issue {
     this.assignedTechnicianName,
     this.assignedTechnicianSpecialization,
     this.assignedTechnicianPhone,
+    this.assignedTechnicianRating,
   });
 
   final String id;
@@ -92,6 +93,7 @@ class Issue {
   final String? assignedTechnicianName;
   final String? assignedTechnicianSpecialization;
   final String? assignedTechnicianPhone;
+  final double? assignedTechnicianRating;
 
   // Helpers to safely extract coordinates for 'Closest' sorting
   double? latitude() => double.tryParse(rawLocation?['latitude']?.toString() ?? '');
@@ -166,6 +168,7 @@ class Issue {
       assignedTechnicianName: technician?['fullName']?.toString(),
       assignedTechnicianSpecialization: technician?['specialization']?.toString(),
       assignedTechnicianPhone: technician?['phoneNumber']?.toString(),
+      assignedTechnicianRating: double.tryParse(technician?['averageRating']?.toString() ?? ''),
     );
   }
   Issue copyWith({
@@ -186,6 +189,7 @@ class Issue {
     String? assignedTechnicianName,
     String? assignedTechnicianSpecialization,
     String? assignedTechnicianPhone,
+    double? assignedTechnicianRating,
   }) {
     return Issue(
       id: id ?? this.id,
@@ -205,7 +209,8 @@ class Issue {
       assignedTechnicianName: assignedTechnicianName ?? this.assignedTechnicianName,
       assignedTechnicianSpecialization: assignedTechnicianSpecialization ?? this.assignedTechnicianSpecialization,
       assignedTechnicianPhone: assignedTechnicianPhone ?? this.assignedTechnicianPhone,
-      );
+      assignedTechnicianRating: assignedTechnicianRating ?? this.assignedTechnicianRating,
+    );
   }
 
   Map<String, dynamic> toJson() {
