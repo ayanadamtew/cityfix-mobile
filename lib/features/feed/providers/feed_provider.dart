@@ -54,6 +54,7 @@ class Issue {
     required this.title,
     required this.description,
     required this.category,
+    this.subcategory,
     required this.status,
     required this.photoUrl,
     required this.urgencyScore,
@@ -68,12 +69,15 @@ class Issue {
     this.assignedTechnicianSpecialization,
     this.assignedTechnicianPhone,
     this.assignedTechnicianRating,
+    this.proofAfterPhotoUrl,
+    this.proofNotes,
   });
 
   final String id;
   final String title;
   final String description;
   final String category;
+  final String? subcategory;
   final String status;
   final String photoUrl;
   final int urgencyScore;
@@ -94,6 +98,10 @@ class Issue {
   final String? assignedTechnicianSpecialization;
   final String? assignedTechnicianPhone;
   final double? assignedTechnicianRating;
+
+  // Completion Proof Info
+  final String? proofAfterPhotoUrl;
+  final String? proofNotes;
 
   // Helpers to safely extract coordinates for 'Closest' sorting
   double? latitude() => double.tryParse(rawLocation?['latitude']?.toString() ?? '');
@@ -145,12 +153,17 @@ class Issue {
 
     final assignment = json['assignment'];
     final technician = assignment?['technician'];
+    
+    // Extract proof if it exists
+    final proofs = assignment?['proofs'];
+    final latestProof = (proofs != null && proofs is List && proofs.isNotEmpty) ? proofs.first : null;
 
     return Issue(
       id: json['_id']?.toString() ?? json['id']?.toString() ?? '',
       title: json['title']?.toString() ?? '',
       description: json['description']?.toString() ?? '',
       category: json['category']?.toString() ?? 'Other',
+      subcategory: json['subcategory']?.toString(),
       status: json['status']?.toString() ?? 'pending',
       photoUrl: json['photoUrl']?.toString() ?? '',
       urgencyScore: parseInt(json['urgencyCount'] ?? json['urgencyScore']),
@@ -169,6 +182,8 @@ class Issue {
       assignedTechnicianSpecialization: technician?['specialization']?.toString(),
       assignedTechnicianPhone: technician?['phoneNumber']?.toString(),
       assignedTechnicianRating: double.tryParse(technician?['averageRating']?.toString() ?? ''),
+      proofAfterPhotoUrl: latestProof?['afterPhotoUrl']?.toString(),
+      proofNotes: latestProof?['notes']?.toString(),
     );
   }
   Issue copyWith({
@@ -176,6 +191,7 @@ class Issue {
     String? title,
     String? description,
     String? category,
+    String? subcategory,
     String? status,
     String? photoUrl,
     int? urgencyScore,
@@ -190,12 +206,15 @@ class Issue {
     String? assignedTechnicianSpecialization,
     String? assignedTechnicianPhone,
     double? assignedTechnicianRating,
+    String? proofAfterPhotoUrl,
+    String? proofNotes,
   }) {
     return Issue(
       id: id ?? this.id,
       title: title ?? this.title,
       description: description ?? this.description,
       category: category ?? this.category,
+      subcategory: subcategory ?? this.subcategory,
       status: status ?? this.status,
       photoUrl: photoUrl ?? this.photoUrl,
       urgencyScore: urgencyScore ?? this.urgencyScore,
@@ -210,6 +229,8 @@ class Issue {
       assignedTechnicianSpecialization: assignedTechnicianSpecialization ?? this.assignedTechnicianSpecialization,
       assignedTechnicianPhone: assignedTechnicianPhone ?? this.assignedTechnicianPhone,
       assignedTechnicianRating: assignedTechnicianRating ?? this.assignedTechnicianRating,
+      proofAfterPhotoUrl: proofAfterPhotoUrl ?? this.proofAfterPhotoUrl,
+      proofNotes: proofNotes ?? this.proofNotes,
     );
   }
 
@@ -219,6 +240,7 @@ class Issue {
       'title': title,
       'description': description,
       'category': category,
+      if (subcategory != null) 'subcategory': subcategory,
       'status': status,
       'photoUrl': photoUrl,
       'urgencyCount': urgencyScore,
@@ -236,7 +258,13 @@ class Issue {
           'fullName': assignedTechnicianName,
           'specialization': assignedTechnicianSpecialization,
           'phoneNumber': assignedTechnicianPhone,
-        }
+        },
+        'proofs': proofAfterPhotoUrl != null ? [
+          {
+            'afterPhotoUrl': proofAfterPhotoUrl,
+            'notes': proofNotes,
+          }
+        ] : null,
       } : null,
     };
   }

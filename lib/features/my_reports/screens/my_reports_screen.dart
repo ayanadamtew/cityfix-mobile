@@ -8,6 +8,8 @@ import 'package:geocoding/geocoding.dart' as geo;
 import 'package:cityfix/l10n/app_localizations.dart';
 import 'package:cityfix/shared/l10n_extensions.dart';
 
+import 'package:cached_network_image/cached_network_image.dart';
+
 import '../../feed/providers/feed_provider.dart';
 import '../providers/my_reports_provider.dart';
 import '../widgets/my_report_card.dart';
@@ -34,14 +36,13 @@ class _MyReportsScreenState extends ConsumerState<MyReportsScreen> {
       builder: (ctx) => Padding(
         padding: EdgeInsets.only(
           bottom: MediaQuery.of(ctx).viewInsets.bottom,
-          left: 16,
-          right: 16,
-          top: 16,
         ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(l.rateResolution,
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(l.rateResolution,
                 style: Theme.of(ctx).textTheme.titleLarge),
             const SizedBox(height: 16),
             RatingBar.builder(
@@ -92,7 +93,8 @@ class _MyReportsScreenState extends ConsumerState<MyReportsScreen> {
           ],
         ),
       ),
-    );
+    ),
+  );
   }
 
   void _showEditModal(BuildContext context, WidgetRef ref, Issue issue) {
@@ -138,6 +140,134 @@ class _MyReportsScreenState extends ConsumerState<MyReportsScreen> {
     );
   }
 
+  void _showConfirmationModal(BuildContext context, WidgetRef ref, Issue issue) {
+    final l = AppLocalizations.of(context)!;
+    final reasonCtrl = TextEditingController();
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (ctx) => Padding(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(ctx).viewInsets.bottom,
+        ),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text('Review Resolution',
+                style: Theme.of(ctx).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+            const SizedBox(height: 8),
+            Text('A technician has marked this issue as fixed. Please review the provided proof and confirm.', style: Theme.of(ctx).textTheme.bodyMedium),
+            const SizedBox(height: 16),
+            
+            if (issue.proofAfterPhotoUrl != null && issue.proofAfterPhotoUrl!.isNotEmpty) ...[
+              ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: CachedNetworkImage(
+                  imageUrl: issue.proofAfterPhotoUrl!.startsWith('http')
+                      ? issue.proofAfterPhotoUrl!
+                      : '\${AppConstants.baseUrl}\${issue.proofAfterPhotoUrl}',
+                  height: 200,
+                  fit: BoxFit.cover,
+                ),
+              ),
+              const SizedBox(height: 8),
+            ],
+            
+            if (issue.proofNotes != null && issue.proofNotes!.isNotEmpty) ...[
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Theme.of(ctx).colorScheme.surfaceContainerHighest,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Technician Notes:', style: Theme.of(ctx).textTheme.labelSmall?.copyWith(fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 4),
+                    Text(issue.proofNotes!),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+            ],
+
+            TextField(
+              controller: reasonCtrl,
+              decoration: const InputDecoration(
+                hintText: 'Reason (Required if rejecting)',
+                border: OutlineInputBorder(),
+              ),
+              maxLines: 2,
+            ),
+            const SizedBox(height: 24),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    style: OutlinedButton.styleFrom(foregroundColor: Colors.red),
+                    onPressed: () async {
+                      if (reasonCtrl.text.trim().isEmpty) {
+                        ToastService.showInfo(ctx, 'Please provide a reason for rejecting.');
+                        return;
+                      }
+                      try {
+                        await ref.read(myReportsProvider.notifier).confirmResolution(
+                          issue.id,
+                          false,
+                          reason: reasonCtrl.text.trim(),
+                        );
+                        if (ctx.mounted) {
+                          Navigator.pop(ctx);
+                          ToastService.showSuccess(ctx, 'Fix rejected.');
+                        }
+                      } catch (e) {
+                        if (ctx.mounted) {
+                          ToastService.showError(ctx, 'Failed to reject fix.');
+                        }
+                      }
+                    },
+                    child: const Text('Not Fixed'),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: FilledButton(
+                    onPressed: () async {
+                      try {
+                        await ref.read(myReportsProvider.notifier).confirmResolution(
+                          issue.id,
+                          true,
+                          reason: reasonCtrl.text.trim(),
+                        );
+                        if (ctx.mounted) {
+                          Navigator.pop(ctx);
+                          ToastService.showSuccess(ctx, 'Fix confirmed! Thank you.');
+                          // Could automatically show feedback modal next
+                        }
+                      } catch (e) {
+                        if (ctx.mounted) {
+                          ToastService.showError(ctx, 'Failed to confirm fix.');
+                        }
+                      }
+                    },
+                    child: const Text('Confirm Fixed'),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
+          ],
+        ),
+      ),
+    ),
+  );
+  }
+
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(myReportsProvider);
@@ -155,87 +285,98 @@ class _MyReportsScreenState extends ConsumerState<MyReportsScreen> {
 
     return Scaffold(
       appBar: AppBar(title: Text(l.myReports)),
-      body: Column(
-        children: [
-          if (isOffline)
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-              color: Colors.red.shade800,
-              child: Row(
-                children: [
-                  const Icon(Icons.wifi_off_rounded, color: Colors.white, size: 16),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      l.offlineMode,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          Expanded(
-            child: state.when(
-              data: (issues) {
-                if (issues.isEmpty) {
-                  return Center(child: Text(l.noReportsYet));
-                }
-                return RefreshIndicator(
-                  onRefresh: () => ref.read(myReportsProvider.notifier).refresh(),
-                  child: ListView.separated(
-                    padding: const EdgeInsets.all(8),
-                    itemCount: issues.length,
-                    separatorBuilder: (_, __) => const SizedBox(height: 8),
-                    itemBuilder: (context, index) {
-                      final issue = issues[index];
-                      return MyReportCard(
-                        issue: issue,
-                        onEdit: () => _showEditModal(context, ref, issue),
-                        onDelete: () => _confirmAndDelete(context, ref, issue.id),
-                        onFeedback: () => _showFeedbackModal(context, ref, issue.id),
-                      );
-                    },
-                  ),
-                );
-              },
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (e, _) => Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(32.0),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
+      body: RefreshIndicator(
+        onRefresh: () => ref.read(myReportsProvider.notifier).refresh(),
+        child: CustomScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          slivers: [
+            if (isOffline)
+              SliverToBoxAdapter(
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                  color: Colors.red.shade800,
+                  child: Row(
                     children: [
-                      Icon(
-                        Icons.cloud_off_rounded,
-                        size: 64,
-                        color: theme.colorScheme.outline,
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        l.failedGeneric(e.toString()),
-                        textAlign: TextAlign.center,
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: theme.colorScheme.onSurfaceVariant,
+                      const Icon(Icons.wifi_off_rounded, color: Colors.white, size: 16),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          l.offlineMode,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 24),
-                      FilledButton.icon(
-                        onPressed: () => ref.read(myReportsProvider.notifier).refresh(),
-                        icon: const Icon(Icons.refresh_rounded),
-                        label: Text(l.retry),
                       ),
                     ],
                   ),
                 ),
               ),
+            state.when(
+              data: (issues) {
+                if (issues.isEmpty) {
+                  return SliverFillRemaining(
+                    child: Center(child: Text(l.noReportsYet)),
+                  );
+                }
+                return SliverPadding(
+                  padding: const EdgeInsets.all(8),
+                  sliver: SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                      (context, index) {
+                        final issue = issues[index];
+                        return MyReportCard(
+                          issue: issue,
+                          onEdit: () => _showEditModal(context, ref, issue),
+                          onDelete: () => _confirmAndDelete(context, ref, issue.id),
+                          onFeedback: () => _showFeedbackModal(context, ref, issue.id),
+                          onConfirmResolution: () => _showConfirmationModal(context, ref, issue),
+                        );
+                      },
+                      childCount: issues.length,
+                    ),
+                  ),
+                );
+              },
+              loading: () => const SliverFillRemaining(
+                child: Center(child: CircularProgressIndicator()),
+              ),
+              error: (e, _) => SliverFillRemaining(
+                child: Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(32.0),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.cloud_off_rounded,
+                          size: 64,
+                          color: theme.colorScheme.outline,
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          l.failedGeneric(e.toString()),
+                          textAlign: TextAlign.center,
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                        FilledButton.icon(
+                          onPressed: () => ref.read(myReportsProvider.notifier).refresh(),
+                          icon: const Icon(Icons.refresh_rounded),
+                          label: Text(l.retry),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -255,6 +396,7 @@ class _EditReportFormState extends State<_EditReportForm> {
   late final MapController _mapController;
 
   late String _selectedCategory;
+  String? _selectedSubcategory;
   late String _selectedKebele;
   late double _lat;
   late double _lng;
@@ -272,6 +414,7 @@ class _EditReportFormState extends State<_EditReportForm> {
     if (!AppConstants.categories.contains(_selectedCategory)) {
       _selectedCategory = AppConstants.categories.first;
     }
+    _selectedSubcategory = widget.issue.subcategory;
 
     final rawKebele = widget.issue.rawLocation?['kebele']?.toString() ?? '';
     _selectedKebele = AppConstants.jimmaKebeles.contains(rawKebele)
@@ -348,7 +491,7 @@ class _EditReportFormState extends State<_EditReportForm> {
             _descCtrl.text.trim(),
             _selectedCategory,
             _selectedKebele,
-            patchedIssue,
+            patchedIssue.copyWith(subcategory: _selectedSubcategory),
           );
       if (mounted) {
         Navigator.pop(context);
@@ -416,9 +559,29 @@ class _EditReportFormState extends State<_EditReportForm> {
                     items: AppConstants.categories
                         .map((c) => DropdownMenuItem(value: c, child: Text(l.translateCategory(c))))
                         .toList(),
-                    onChanged: (v) => setState(() => _selectedCategory = v!),
+                    onChanged: (v) {
+                      setState(() {
+                        _selectedCategory = v!;
+                        _selectedSubcategory = null;
+                      });
+                    },
                   ),
                   const SizedBox(height: 16),
+
+                  if (AppConstants.subcategories[_selectedCategory] != null) ...[
+                    DropdownButtonFormField<String>(
+                      value: _selectedSubcategory,
+                      decoration: const InputDecoration(
+                        labelText: 'Subcategory',
+                        border: OutlineInputBorder(),
+                      ),
+                      items: AppConstants.subcategories[_selectedCategory]!
+                          .map((s) => DropdownMenuItem(value: s, child: Text(s)))
+                          .toList(),
+                      onChanged: (v) => setState(() => _selectedSubcategory = v),
+                    ),
+                    const SizedBox(height: 16),
+                  ],
 
                   DropdownButtonFormField<String>(
                     initialValue: _selectedKebele,

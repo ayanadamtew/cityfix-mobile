@@ -141,31 +141,54 @@ class IssueCard extends ConsumerWidget {
                               ],
                             ),
                           ),
-                          // Category Pill
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: catColor.withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
+                            // Category Pill
+                            Wrap(
+                              spacing: 6,
                               children: [
-                                Icon(catIcon, size: 12, color: catColor),
-                                const SizedBox(width: 4),
-                                Text(
-                                  l.translateCategory(issue.category),
-                                  style: TextStyle(
-                                    color: catColor,
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w700,
-                                    letterSpacing: 0.2,
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                  decoration: BoxDecoration(
+                                    color: catColor.withValues(alpha: 0.1),
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(catIcon, size: 12, color: catColor),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        l.translateCategory(issue.category),
+                                        style: TextStyle(
+                                          color: catColor,
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w700,
+                                          letterSpacing: 0.2,
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
+                                if (issue.subcategory != null)
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                    decoration: BoxDecoration(
+                                      color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                                      borderRadius: BorderRadius.circular(20),
+                                      border: Border.all(color: theme.colorScheme.outlineVariant.withValues(alpha: 0.5)),
+                                    ),
+                                    child: Text(
+                                      issue.subcategory!,
+                                      style: TextStyle(
+                                        color: theme.colorScheme.onSurfaceVariant,
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w600,
+                                        letterSpacing: 0.2,
+                                      ),
+                                    ),
+                                  ),
                               ],
                             ),
-                          ),
-                          const SizedBox(width: 8),
+                            const SizedBox(width: 8),
                           // Action Menu
                           if (isLoggedIn && (currentBackendId.isEmpty || currentBackendId != issue.authorId))
                             SizedBox(

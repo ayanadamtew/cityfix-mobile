@@ -28,6 +28,7 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
   final _addressCtrl = TextEditingController();
 
   String _category = AppConstants.categories.first;
+  String? _subcategory;
   String _kebele = AppConstants.jimmaKebeles.first;
   File? _imageFile;
   
@@ -110,6 +111,10 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
       ToastService.showError(context, l.locationRequired);
       return;
     }
+    if (_descCtrl.text.trim().isEmpty) {
+      ToastService.showError(context, l.required);
+      return;
+    }
 
     // ── Duplicate check ──────────────────────────────────────────────────
     ToastService.showInfo(context, l.checkingDuplicates);
@@ -136,6 +141,7 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
       final isOfflineSaved = await ref.read(reportProvider.notifier).submit(
             description: _descCtrl.text.trim(),
             category: _category,
+            subcategory: _subcategory,
             latitude: _lat,
             longitude: _lng,
             address: _addressCtrl.text,
@@ -161,7 +167,6 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
   }
 
   /// Shows a warning dialog when duplicates are found.
-  /// Returns true if the user wants to submit anyway.
   Future<bool?> _showDuplicateWarning(
     AppLocalizations l,
     List<Map<String, dynamic>> nearbyReports,
@@ -214,7 +219,6 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
           expand: false,
           builder: (_, scrollCtrl) => Column(
             children: [
-              // Handle bar
               Padding(
                 padding: const EdgeInsets.only(top: 12, bottom: 8),
                 child: Container(
@@ -292,176 +296,254 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
     }
   }
 
+  void _submitReport() {
+    if (_formKey.currentState!.validate()) {
+      _submit(AppLocalizations.of(context)!);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final isLoading = ref.watch(reportProvider).isLoading;
     final theme = Theme.of(context);
     final l = AppLocalizations.of(context)!;
 
+    final subcategories = AppConstants.subcategories[_category] ?? [];
+
     return Scaffold(
       appBar: AppBar(title: Text(l.reportAnIssue)),
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // ── Category ─────────────────────────────────────────────────
-                DropdownButtonFormField<String>(
-                  initialValue: _category,
-                  decoration: InputDecoration(
-                    labelText: l.category,
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                    filled: true,
-                  ),
-                  items: AppConstants.categories
-                      .map((c) => DropdownMenuItem(value: c, child: Text(l.translateCategory(c))))
-                      .toList(),
-                  onChanged: (v) => setState(() => _category = v!),
-                ),
-                const SizedBox(height: 16),
-
-                // ── Kebele Dropdown ──────────────────────────────────────────
-                DropdownButtonFormField<String>(
-                  initialValue: _kebele,
-                  decoration: InputDecoration(
-                    labelText: l.kebele,
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                    filled: true,
-                  ),
-                  items: AppConstants.jimmaKebeles
-                      .map((k) => DropdownMenuItem(value: k, child: Text(k)))
-                      .toList(),
-                  onChanged: (v) => setState(() => _kebele = v!),
-                ),
-                const SizedBox(height: 16),
-
-                // ── Description ──────────────────────────────────────────────
-                CustomTextField(
-                  label: l.detailedDescription,
-                  hint: l.descriptionHint,
-                  controller: _descCtrl,
-                  maxLines: 4,
-                  validator: (v) => v!.isEmpty ? l.required : null,
-                ),
-                const SizedBox(height: 16),
-
-                // ── Photo ────────────────────────────────────────────────────
-                GestureDetector(
-                  onTap: _pickImage,
-                  child: Container(
-                    height: 160,
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
-                      border: Border.all(color: theme.colorScheme.outlineVariant, style: BorderStyle.solid),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: _imageFile != null
-                        ? ClipRRect(
-                            borderRadius: BorderRadius.circular(12),
-                            child: Image.file(_imageFile!, fit: BoxFit.cover),
-                          )
-                        : Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(Icons.camera_alt_outlined, size: 48, color: theme.colorScheme.primary),
-                              const SizedBox(height: 8),
-                              Text(l.tapToPhoto),
-                            ],
-                          ),
-                  ),
-                ),
-                const SizedBox(height: 16),
-
-                // ── Location ─────────────────────────────────────────────────
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        l.location,
-                        style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
-                      ),
-                    ),
-                    _gettingLocation
-                        ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : TextButton.icon(
-                            onPressed: () => _getLocation(l),
-                            icon: const Icon(Icons.my_location, size: 18),
-                            label: Text(l.detectLocation),
-                          ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                SizedBox(
-                  height: 220,
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
-                    child: FlutterMap(
-                      mapController: _mapController,
-                      options: MapOptions(
-                        initialCenter: LatLng(_lat, _lng),
-                        initialZoom: 14.0,
-                        maxZoom: 22.0,
-                        onTap: (_, p) => _setManualLocation(p, l),
-                        interactionOptions: const InteractionOptions(
-                          flags: InteractiveFlag.all & ~InteractiveFlag.rotate,
+        child: isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : SingleChildScrollView(
+                padding: const EdgeInsets.all(24.0),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      // ── Category ──────────────────────────────────────────
+                      Text(l.category, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                      const SizedBox(height: 8),
+                      DropdownButtonFormField<String>(
+                        initialValue: _category,
+                        decoration: InputDecoration(
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                          filled: true,
                         ),
+                        items: AppConstants.categories
+                            .map((c) => DropdownMenuItem(value: c, child: Text(l.translateCategory(c))))
+                            .toList(),
+                        onChanged: (v) {
+                          setState(() {
+                            _category = v!;
+                            _subcategory = null;
+                          });
+                        },
                       ),
-                      children: [
-                        TileLayer(
-                          urlTemplate: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-                          userAgentPackageName: 'com.jimma.cityfix.cityfix_mobile',
-                          maxZoom: 22.0,
-                          maxNativeZoom: 19,
-                        ),
-                        if (_hasSetLocation)
-                          MarkerLayer(
-                            markers: [
-                              Marker(
-                                point: LatLng(_lat, _lng),
-                                width: 40,
-                                height: 40,
-                                child: const Icon(Icons.location_pin, color: Colors.red, size: 40),
-                                alignment: Alignment.topCenter,
+                      const SizedBox(height: 24),
+
+                      // ── Subcategory ───────────────────────────────────────
+                      if (subcategories.isNotEmpty) ...[
+                        Text('Subcategory', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                        const SizedBox(height: 8),
+                        Wrap(
+                          spacing: 8.0,
+                          runSpacing: 8.0,
+                          children: subcategories.map((sub) {
+                            final isSelected = _subcategory == sub;
+                            return ChoiceChip(
+                              label: Text(sub),
+                              selected: isSelected,
+                              onSelected: (selected) {
+                                if (selected) {
+                                  setState(() => _subcategory = sub);
+                                } else if (isSelected) {
+                                  setState(() => _subcategory = null);
+                                }
+                              },
+                              selectedColor: theme.colorScheme.primaryContainer,
+                              labelStyle: TextStyle(
+                                color: isSelected ? theme.colorScheme.onPrimaryContainer : theme.colorScheme.onSurface,
+                                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                               ),
+                            );
+                          }).toList(),
+                        ),
+                        const SizedBox(height: 24),
+                      ],
+
+                      // ── Description & Kebele ──────────────────────────────
+                      Text(l.detailedDescription, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                      const SizedBox(height: 8),
+                      DropdownButtonFormField<String>(
+                        initialValue: _kebele,
+                        decoration: InputDecoration(
+                          labelText: l.kebele,
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                          filled: true,
+                        ),
+                        items: AppConstants.jimmaKebeles
+                            .map((k) => DropdownMenuItem(value: k, child: Text(k)))
+                            .toList(),
+                        onChanged: (v) => setState(() => _kebele = v!),
+                      ),
+                      const SizedBox(height: 16),
+                      CustomTextField(
+                        label: l.detailedDescription,
+                        hint: l.descriptionHint,
+                        controller: _descCtrl,
+                        maxLines: 4,
+                        validator: (v) => v!.isEmpty ? l.required : null,
+                      ),
+                      const SizedBox(height: 24),
+
+                      // ── Photo ─────────────────────────────────────────────
+                      Text(l.tapToPhoto, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                      const SizedBox(height: 8),
+                      GestureDetector(
+                        onTap: _pickImage,
+                        child: Container(
+                          height: 160,
+                          width: double.infinity,
+                          decoration: BoxDecoration(
+                            color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                            border: Border.all(color: theme.colorScheme.outlineVariant, style: BorderStyle.solid),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: _imageFile != null
+                              ? ClipRRect(
+                                  borderRadius: BorderRadius.circular(12),
+                                  child: Image.file(_imageFile!, fit: BoxFit.cover),
+                                )
+                              : Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(Icons.camera_alt_outlined, size: 48, color: theme.colorScheme.primary),
+                                    const SizedBox(height: 8),
+                                    Text(l.tapToPhoto),
+                                  ],
+                                ),
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+
+                      // ── Location ──────────────────────────────────────────
+                      Text(l.location, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              _hasSetLocation 
+                                ? _addressCtrl.text.isNotEmpty 
+                                    ? l.locationSelected(_addressCtrl.text) 
+                                    : l.locationPinpointed
+                                : l.locationInstruction,
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: _hasSetLocation ? theme.colorScheme.primary : theme.colorScheme.outline,
+                                fontWeight: _hasSetLocation ? FontWeight.bold : FontWeight.normal,
+                              ),
+                            ),
+                          ),
+                          _gettingLocation
+                              ? const SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(strokeWidth: 2),
+                                )
+                              : TextButton.icon(
+                                  onPressed: () => _getLocation(l),
+                                  icon: const Icon(Icons.my_location, size: 18),
+                                  label: Text(l.detectLocation),
+                                ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      SizedBox(
+                        height: 220,
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(12),
+                          child: FlutterMap(
+                            mapController: _mapController,
+                            options: MapOptions(
+                              initialCenter: LatLng(_lat, _lng),
+                              initialZoom: 14.0,
+                              maxZoom: 22.0,
+                              onTap: (_, p) => _setManualLocation(p, l),
+                              interactionOptions: const InteractionOptions(
+                                flags: InteractiveFlag.all & ~InteractiveFlag.rotate,
+                              ),
+                            ),
+                            children: [
+                              TileLayer(
+                                urlTemplate: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+                                userAgentPackageName: 'com.jimma.cityfix.cityfix_mobile',
+                                maxZoom: 22.0,
+                                maxNativeZoom: 19,
+                              ),
+                              if (_hasSetLocation)
+                                MarkerLayer(
+                                  markers: [
+                                    Marker(
+                                      point: LatLng(_lat, _lng),
+                                      width: 40,
+                                      height: 40,
+                                      child: const Icon(Icons.location_pin, color: Colors.red, size: 40),
+                                      alignment: Alignment.topCenter,
+                                    ),
+                                  ],
+                                ),
                             ],
                           ),
-                      ],
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  _hasSetLocation 
-                      ? _addressCtrl.text.isNotEmpty 
-                          ? l.locationSelected(_addressCtrl.text) 
-                          : l.locationPinpointed
-                      : l.locationInstruction,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: _hasSetLocation ? theme.colorScheme.primary : theme.colorScheme.outline,
-                    fontWeight: _hasSetLocation ? FontWeight.bold : FontWeight.normal,
-                  ),
-                ),
-                const SizedBox(height: 32),
-
-                // ── Submit ───────────────────────────────────────────────────
-                isLoading
-                    ? const Center(child: CircularProgressIndicator())
-                    : FilledButton.icon(
-                        onPressed: () => _submit(l),
-                        icon: const Icon(Icons.send),
-                        label: Text(l.submitReport),
+                        ),
                       ),
-              ],
+                      const SizedBox(height: 48),
+
+                      // ── Submit Button ─────────────────────────────────────
+                      FilledButton(
+                        onPressed: _submitReport,
+                        child: const Padding(
+                          padding: EdgeInsets.all(16.0),
+                          child: Text('Submit Report', style: TextStyle(fontSize: 16)),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+      ),
+    );
+  }
+}
+
+class _ReviewRow extends StatelessWidget {
+  final String label;
+  final String value;
+  
+  const _ReviewRow({required this.label, required this.value});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 100,
+            child: Text(
+              '$label:',
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
             ),
           ),
-        ),
+          Expanded(
+            child: Text(
+              value,
+              style: const TextStyle(fontSize: 12),
+            ),
+          ),
+        ],
       ),
     );
   }

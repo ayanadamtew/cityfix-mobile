@@ -5,8 +5,8 @@ class AppConstants {
   // ---------------------------------------------------------------------------
   // API
   // ---------------------------------------------------------------------------
-  // static const String baseUrl = 'http://10.117.93.125:5000'; // Set to physical host IP
-  static const String baseUrl = 'https://cityfix-backend-4jz2.onrender.com';
+  static const String baseUrl = 'http://10.202.97.125:5000'; // Set to physical host IP
+  // static const String baseUrl = 'https://cityfix-backend-4jz2.onrender.com';
   // Change to your deployed backend URL before production.
 
   // ---------------------------------------------------------------------------
@@ -26,6 +26,41 @@ class AppConstants {
     'Road',
     'Electricity',
   ];
+
+  static const Map<String, List<String>> subcategories = {
+    'Water': [
+      'Pipe Leakage',
+      'Water Supply Interruption',
+      'Drainage Blockage',
+      'Sewer Overflow',
+      'Broken Water Pipe',
+      'Low Water Pressure',
+    ],
+    'Road': [
+      'Pothole',
+      'Road Crack',
+      'Road Blockage',
+      'Damaged Sidewalk',
+      'Broken Traffic Sign',
+      'Flooded Road',
+    ],
+    'Electricity': [
+      'Street Light Failure',
+      'Power Outage',
+      'Exposed Wire',
+      'Damaged Electric Pole',
+      'Transformer Issue',
+      'Electrical Hazard',
+    ],
+    'Waste': [
+      'Uncollected Garbage',
+      'Overflowing Bin',
+      'Illegal Dumping',
+      'Blocked Waste Channel',
+      'Dead Animal Removal',
+      'Recycling Issue',
+    ],
+  };
 
   // ---------------------------------------------------------------------------
   // Jimma City Kebeles (17 Urban Kebeles)
@@ -55,5 +90,6 @@ class AppConstants {
   // ---------------------------------------------------------------------------
   static const String statusPending = 'pending';
   static const String statusInProgress = 'in_progress';
+  static const String statusWaitingConfirmation = 'waiting confirmation';
   static const String statusResolved = 'resolved';
 }

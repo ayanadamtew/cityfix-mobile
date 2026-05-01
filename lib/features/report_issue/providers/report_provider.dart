@@ -49,6 +49,7 @@ class ReportNotifier extends AutoDisposeAsyncNotifier<void> {
   Future<bool> submit({
     required String description,
     required String category,
+    required String? subcategory,
     required double latitude,
     required double longitude,
     required String address,
@@ -72,6 +73,7 @@ class ReportNotifier extends AutoDisposeAsyncNotifier<void> {
           'id': draftId,
           'description': description,
           'category': category,
+          'subcategory': subcategory,
           'latitude': latitude,
           'longitude': longitude,
           'address': address,
@@ -90,6 +92,7 @@ class ReportNotifier extends AutoDisposeAsyncNotifier<void> {
 
         final payload = {
           'category': category,
+          if (subcategory != null) 'subcategory': subcategory,
           'description': description,
           'location': {
             'latitude': latitude,

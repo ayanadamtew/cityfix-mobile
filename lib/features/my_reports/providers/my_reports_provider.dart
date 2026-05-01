@@ -79,6 +79,7 @@ class MyReportsNotifier extends AutoDisposeAsyncNotifier<List<Issue>> {
     final payload = {
       'description': description,
       'category': category,
+      if (oldIssue.subcategory != null) 'subcategory': oldIssue.subcategory,
       'location': {
         'latitude': oldIssue.latitude(),
         'longitude': oldIssue.longitude(),
@@ -107,6 +108,19 @@ class MyReportsNotifier extends AutoDisposeAsyncNotifier<List<Issue>> {
     }
     
     // Also invalidate the main feed so it drops the deleted issue immediately
+    ref.invalidate(feedProvider(const FeedFilter()));
+  }
+
+  Future<void> confirmResolution(String issueId, bool confirmed, {String? reason}) async {
+    await ApiClient.instance.dio.post(
+      '/api/issues/$issueId/confirm',
+      data: {
+        'confirmed': confirmed,
+        if (reason != null && reason.isNotEmpty) 'reason': reason,
+      },
+    );
+    // Refresh to show updated status (Resolved or Rejected)
+    ref.invalidateSelf();
     ref.invalidate(feedProvider(const FeedFilter()));
   }
 }

@@ -19,12 +19,14 @@ class MyReportCard extends ConsumerWidget {
     this.onEdit,
     this.onDelete,
     this.onFeedback,
+    this.onConfirmResolution,
   });
 
   final Issue issue;
   final VoidCallback? onEdit;
   final VoidCallback? onDelete;
   final VoidCallback? onFeedback;
+  final VoidCallback? onConfirmResolution;
 
   Color _categoryColor(String category) {
     switch (category.toLowerCase()) {
@@ -66,6 +68,7 @@ class MyReportCard extends ConsumerWidget {
 
     final isResolved = issue.status.toLowerCase() == AppConstants.statusResolved.toLowerCase();
     final isPending = issue.status.toLowerCase() == AppConstants.statusPending.toLowerCase();
+    final isWaitingConfirmation = issue.status.toLowerCase() == AppConstants.statusWaitingConfirmation.toLowerCase();
 
     return Card(
       elevation: 0,
@@ -143,25 +146,50 @@ class MyReportCard extends ConsumerWidget {
                   // Category & Status Row
                   Row(
                     children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: catColor.withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
+                      Expanded(
+                        child: Wrap(
+                          spacing: 6,
+                          runSpacing: 4,
                           children: [
-                            Icon(catIcon, size: 12, color: catColor),
-                            const SizedBox(width: 4),
-                            Text(
-                              l.translateCategory(issue.category),
-                              style: TextStyle(
-                                color: catColor,
-                                fontSize: 10,
-                                fontWeight: FontWeight.bold,
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: catColor.withValues(alpha: 0.12),
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(catIcon, size: 12, color: catColor),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    l.translateCategory(issue.category),
+                                    style: TextStyle(
+                                      color: catColor,
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
+                            if (issue.subcategory != null)
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                                  borderRadius: BorderRadius.circular(6),
+                                  border: Border.all(color: theme.colorScheme.outlineVariant.withValues(alpha: 0.5)),
+                                ),
+                                child: Text(
+                                  issue.subcategory!,
+                                  style: TextStyle(
+                                    color: theme.colorScheme.onSurfaceVariant,
+                                    fontSize: 9,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
                           ],
                         ),
                       ),
@@ -192,7 +220,7 @@ class MyReportCard extends ConsumerWidget {
                         children: [
                           Icon(Icons.engineering_outlined, color: theme.colorScheme.primary, size: 16),
                           const SizedBox(width: 8),
-                          Expanded(
+                          Flexible(
                             child: Text(
                               'Assigned: ${issue.assignedTechnicianName}${issue.assignedTechnicianRating != null ? ' ⭐${issue.assignedTechnicianRating!.toStringAsFixed(1)}' : ''} (${issue.assignedTechnicianSpecialization ?? 'Tech'})',
                               style: theme.textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold, color: theme.colorScheme.primary),
@@ -207,21 +235,28 @@ class MyReportCard extends ConsumerWidget {
                   const SizedBox(height: 12),
 
                   // Footer: Date & Actions
-                  Row(
+                  Wrap(
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    spacing: 8,
+                    runSpacing: 8,
                     children: [
-                      Icon(
-                        Icons.calendar_today_outlined,
-                        size: 12,
-                        color: theme.colorScheme.outline,
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.calendar_today_outlined,
+                            size: 12,
+                            color: theme.colorScheme.outline,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            DateFormat('MMM d, y').format(issue.createdAt.toLocal()),
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              color: theme.colorScheme.outline,
+                            ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(width: 4),
-                      Text(
-                        DateFormat('MMM d, y').format(issue.createdAt.toLocal()),
-                        style: theme.textTheme.labelSmall?.copyWith(
-                          color: theme.colorScheme.outline,
-                        ),
-                      ),
-                      const Spacer(),
                       if (isPending) ...[
                         if (onEdit != null)
                           SizedBox(
@@ -238,16 +273,16 @@ class MyReportCard extends ConsumerWidget {
                               ),
                             ),
                           ),
-                        if (onDelete != null) ...[
-                          const SizedBox(width: 8),
+                        if (onDelete != null)
                           IconButton(
                             icon: const Icon(Icons.delete_outline, size: 20),
                             color: Colors.red.shade400,
+                            constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                            padding: EdgeInsets.zero,
                             onPressed: isOffline 
                                ? () => ToastService.showInfo(context, l.youAreOffline)
                                : onDelete,
                           ),
-                        ],
                       ],
                       if (isResolved)
                         SizedBox(
@@ -257,8 +292,23 @@ class MyReportCard extends ConsumerWidget {
                                ? () => ToastService.showInfo(context, l.youAreOffline)
                                : onFeedback,
                             icon: const Icon(Icons.star_rate_rounded, size: 14),
-                            label: Text(l.submitFeedback), // Changed to submitFeedback as "Feedback" was not explicitly in ARB besides button text intent
+                            label: Text(l.submitFeedback),
                             style: ElevatedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(horizontal: 12),
+                              textStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                            ),
+                          ),
+                        ),
+                      if (isWaitingConfirmation && onConfirmResolution != null)
+                        SizedBox(
+                          height: 32,
+                          child: FilledButton.icon(
+                            onPressed: isOffline 
+                               ? () => ToastService.showInfo(context, l.youAreOffline)
+                               : onConfirmResolution,
+                            icon: const Icon(Icons.check_circle_outline, size: 14),
+                            label: const Text('Review Fix'),
+                            style: FilledButton.styleFrom(
                               padding: const EdgeInsets.symmetric(horizontal: 12),
                               textStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
                             ),
